@@ -1,73 +1,38 @@
-# Welcome to your Lovable project
+## About AgriLink Global
 
-## Project info
+AgriLink Global is a modern agricultural trading and export platform designed to connect farmers, suppliers, exporters, importers, and international buyers through a secure and efficient digital marketplace. The platform aims to simplify agricultural trade by providing access to verified agricultural products, trusted suppliers, market information, logistics support, and export services.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+AgriLink Global focuses on promoting African agricultural products in global markets by creating opportunities for farmers and agribusinesses to reach buyers worldwide. Through technology-driven solutions, the platform enhances transparency, efficiency, and accessibility across the agricultural value chain.
 
-## How can I edit this code?
+### Key Features
 
-There are several ways of editing your application.
+* Agricultural product marketplace
+* Import and export management
+* Supplier and buyer registration
+* Product catalog and search
+* Request for quotation (RFQ) system
+* Logistics and shipping coordination
+* Trade documentation support
+* Market insights and agricultural news
+* Secure communication between buyers and suppliers
+* Multi-country trade opportunities
 
-**Use Lovable**
+### Products
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+* Sesame Seeds
+* Ginger
+* Hibiscus Flower
+* Cashew Nuts
+* Soybeans
+* Maize
+* Rice
+* Cocoa
+* Palm Products
 
-Changes made via Lovable will be committed automatically to this repo.
+### Mission
 
-**Use your preferred IDE**
+To empower farmers, agribusinesses, and global buyers by providing a reliable digital platform that simplifies agricultural trade and promotes sustainable economic growth.
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Vision
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+To become Africa's leading agricultural marketplace and global trade platform, connecting local producers with international markets while driving innovation, transparency, and prosperity in the agricultural sector.
