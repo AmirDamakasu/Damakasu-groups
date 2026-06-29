@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Professional Industrial Corporate Palette */
+    --background: 210 40% 98%;       /* #F8FAFC */
+    --foreground: 215 28% 17%;       /* #1E293B */
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 28% 17%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 28% 17%;
+
+    /* Deep Navy - Primary Brand */
+    --primary: 222 47% 11%;          /* #0F172A */
+    --primary-foreground: 210 40% 98%;
+
+    /* Electric Blue - Accent/Action */
+    --secondary: 217 91% 60%;        /* #2563EB */
+    --secondary-foreground: 0 0% 100%;
+
+    --muted: 210 20% 92%;
+    --muted-foreground: 215 16% 47%;
+
+    /* Slate Secondary */
+    --accent: 215 28% 17%;           /* #1E293B */
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 217 91% 60%;
+
+    --radius: 0.5rem;
+
+    /* Custom tokens - Industrial theme */
+    --ivory: 210 40% 98%;
+    --cream: 210 30% 95%;
+    --gold: 217 91% 60%;             /* Blue accent replaces gold */
+    --gold-light: 213 94% 68%;
+    --forest: 222 47% 11%;
+    --forest-light: 215 28% 17%;
+    --earth: 215 28% 17%;
+    --earth-light: 215 16% 30%;
+
+    /* Gradients - Industrial */
+    --gradient-hero: linear-gradient(135deg, hsl(222 47% 11% / 0.97), hsl(215 50% 18% / 0.93));
+    --gradient-gold: linear-gradient(135deg, hsl(217 91% 60%), hsl(213 94% 68%));
+    --gradient-earth: linear-gradient(180deg, hsl(210 40% 98%), hsl(210 30% 95%));
+
+    /* Shadows - Crisp & Corporate */
+    --shadow-soft: 0 4px 20px hsl(222 47% 11% / 0.07);
+    --shadow-medium: 0 8px 30px hsl(222 47% 11% / 0.12);
+    --shadow-gold: 0 4px 20px hsl(217 91% 60% / 0.25);
+
+    /* Sidebar */
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 28% 17%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 215 25% 20%;
+    --sidebar-ring: 217 91% 60%;
+  }
+
+  .dark {
+    --background: 222 47% 7%;
+    --foreground: 210 40% 95%;
+
+    --card: 222 47% 10%;
+    --card-foreground: 210 40% 95%;
+
+    --popover: 222 47% 10%;
+    --popover-foreground: 210 40% 95%;
+
+    --primary: 217 91% 60%;
+    --primary-foreground: 222 47% 7%;
+
+    --secondary: 213 94% 68%;
+    --secondary-foreground: 222 47% 7%;
+
+    --muted: 215 28% 17%;
+    --muted-foreground: 210 15% 60%;
+
+    --accent: 215 28% 20%;
+    --accent-foreground: 210 40% 95%;
+
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 210 40% 95%;
+
+    --border: 215 25% 20%;
+    --input: 215 25% 20%;
+    --ring: 217 91% 60%;
+
+    --ivory: 222 47% 7%;
+    --cream: 222 47% 10%;
+    --gold: 217 91% 60%;
+    --gold-light: 213 94% 68%;
+    --forest: 217 91% 60%;
+    --forest-light: 213 94% 68%;
+    --earth: 215 28% 20%;
+    --earth-light: 215 20% 35%;
+
+    --gradient-hero: linear-gradient(135deg, hsl(222 47% 8% / 0.97), hsl(215 50% 12% / 0.93));
+    --gradient-gold: linear-gradient(135deg, hsl(217 91% 55%), hsl(213 94% 45%));
+    --gradient-earth: linear-gradient(180deg, hsl(222 47% 7%), hsl(222 47% 5%));
+
+    --sidebar-background: 222 47% 7%;
+    --sidebar-foreground: 210 40% 95%;
+    --sidebar-primary: 217 91% 60%;
+    --sidebar-primary-foreground: 222 47% 7%;
+    --sidebar-accent: 215 28% 17%;
+    --sidebar-accent-foreground: 210 40% 95%;
+    --sidebar-border: 215 25% 15%;
+    --sidebar-ring: 217 91% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-grain {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");
+  }
+
+  .animate-fade-up {
+    animation: fadeUp 0.6s ease-out forwards;
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.8s ease-out forwards;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+}
