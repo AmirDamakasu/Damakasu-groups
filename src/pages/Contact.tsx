@@ -106,8 +106,7 @@ function QuoteForm() {
 
       setSubmitted(true);
       setFormData(EMPTY_FORM);
-    } catch (err) {
-      console.error(err);
+    } catch {
       toast({
         title: "Network Error",
         description: "Please check your connection and try again.",

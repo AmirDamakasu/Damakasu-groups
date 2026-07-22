@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
-import { Users, Globe, Package, Award } from "lucide-react";
+import { Users, Globe, Award, TrendingUp } from "lucide-react";
 
 const stats = [
-  { icon: Users, value: "100+", label: "Manufacturing Clients" },
-  { icon: Package, value: "50,000+", label: "Metric Tons Supplied Annually" },
-  { icon: Globe, value: "40+", label: "Countries Served" },
-  { icon: Award, value: "15+", label: "Years Industry Experience" },
+  { icon: Award, value: "22+", label: "Years Trading Experience (Since 2003)" },
+  { icon: TrendingUp, value: "2015", label: "Official Company Registration" },
+  { icon: Globe, value: "Global", label: "Import & Export Operations" },
+  { icon: Users, value: "Trusted", label: "Farmers, Suppliers & Business Partners" },
 ];
 
 export function StatsSection() {

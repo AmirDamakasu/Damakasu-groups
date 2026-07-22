@@ -11,10 +11,12 @@ import cashewImg from "@/assets/product-cashew.jpg";
 import soybeanImg from "@/assets/product-soybean.jpg";
 import riceImg from "@/assets/product-rice.jpg";
 import maizeImg from "@/assets/product-maize.jpg";
-import hibiscusImg from "@/assets/product-hibiscus.png";
-import coffeeImg from "@/assets/product-coffee.png";
+import hibiscusImg from "@/assets/product-hibiscus.jpg";
+import coffeeImg from "@/assets/product-coffee.jpg";
 import gingerImg from "@/assets/product-ginger.jpg";
 import cocoaImg from "@/assets/product-cocoa.jpg";
+import milletImg from "@/assets/product-millet.jpg";
+import sorghumImg from "@/assets/product-sorghum.jpg";
 
 const products = [
   {
@@ -106,6 +108,26 @@ const products = [
     packaging: ["64kg Jute Bags", "Bulk Shipping"],
     standards: ["UTZ Certified", "Rainforest Alliance", "Grade A Quality"],
     description: "Premium fermented cocoa beans for confectionery production and cocoa butter processing. Properly sun-dried and fermented to develop chocolate flavor notes, complying with international quality standards.",
+  },
+  {
+    name: "Pearl Millet",
+    slug: "millet",
+    image: milletImg,
+    category: "Staple Grain Supply",
+    grades: ["Grade A Whole", "De-husked", "Millet Flour"],
+    packaging: ["25kg Bags", "50kg Bags", "Bulk"],
+    standards: ["Moisture < 12%", "Aflatoxin-Free", "Phytosanitary Certified"],
+    description: "Premium pearl millet (fonio) sourced from Nigeria's northern growing regions for food manufacturers, animal feed producers, and export markets. Cleaned, dried, and graded for consistent quality and minimal impurities.",
+  },
+  {
+    name: "Sorghum",
+    slug: "sorghum",
+    image: sorghumImg,
+    category: "Industrial Grain Supply",
+    grades: ["White Sorghum", "Red Sorghum", "Feed Grade"],
+    packaging: ["50kg Bags", "Bulk Silos", "Bulk Vessels"],
+    standards: ["Aflatoxin-Free", "Moisture < 13%", "SGS Certified"],
+    description: "High-quality sorghum grain for flour milling, animal feed production, brewing industries, and export. Our sorghum is carefully sorted and dried to meet strict aflatoxin and moisture standards required by international processors.",
   },
 ];
 

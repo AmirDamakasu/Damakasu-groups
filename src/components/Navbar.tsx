@@ -15,6 +15,8 @@ const products = [
   { name: "Coffee Beans", href: "/products#coffee" },
   { name: "Ginger", href: "/products#ginger" },
   { name: "Cocoa Beans", href: "/products#cocoa" },
+  { name: "Pearl Millet", href: "/products#millet" },
+  { name: "Sorghum", href: "/products#sorghum" },
 ];
 
 const services = [

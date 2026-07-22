@@ -58,11 +58,27 @@ ALTER TABLE security_events ENABLE ROW LEVEL SECURITY;
 -- Allow anon INSERT only through Edge Function (service_role key bypasses RLS)
 -- For the admin dashboard, we use service_role key via Edge Function
 -- Public users cannot read the table directly
+-- Anon role: deny ALL operations directly on quote_requests
+-- All reads/writes must go through the service-role Edge Functions
 CREATE POLICY "deny_anon_select" ON quote_requests
   FOR SELECT TO anon USING (false);
 
 CREATE POLICY "deny_anon_insert" ON quote_requests
   FOR INSERT TO anon WITH CHECK (false);
+
+CREATE POLICY "deny_anon_update" ON quote_requests
+  FOR UPDATE TO anon USING (false);
+
+CREATE POLICY "deny_anon_delete" ON quote_requests
+  FOR DELETE TO anon USING (false);
+
+-- Rate limits table: anon can never read or write directly
+CREATE POLICY "deny_anon_rate_limits_all" ON rate_limits
+  FOR ALL TO anon USING (false) WITH CHECK (false);
+
+-- Security events log: anon can never read or write directly
+CREATE POLICY "deny_anon_security_events_all" ON security_events
+  FOR ALL TO anon USING (false) WITH CHECK (false);
 
 -- Index for admin dashboard queries
 CREATE INDEX IF NOT EXISTS idx_quote_requests_created_at ON quote_requests (created_at DESC);

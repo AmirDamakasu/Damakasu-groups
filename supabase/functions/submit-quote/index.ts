@@ -12,11 +12,25 @@ const RATE_LIMIT = 5; // max submissions per IP per hour
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
-// ─── CORS headers ──────────────────────────────────────────────
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+// ─── Allowed origins for CORS ────────────────────────────────────
+const ALLOWED_ORIGINS = [
+  "https://damakasu-groups.vercel.app",
+  "http://localhost:8080",
+  "http://127.0.0.1:8080",
+];
+
+function getCorsHeaders(requestOrigin: string | null) {
+  const origin = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin)
+    ? requestOrigin
+    : ALLOWED_ORIGINS[0];
+
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "X-Content-Type-Options": "nosniff",
+  };
+}
 
 // ─── Sanitize: strip HTML tags ─────────────────────────────────
 function sanitize(input: unknown): string {
@@ -169,8 +183,11 @@ function customerEmailHtml(name: string) {
 
 // ─── Main handler ──────────────────────────────────────────────
 Deno.serve(async (req) => {
+  const origin = req.headers.get("origin");
+  const corsHeaders = getCorsHeaders(origin);
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: CORS });
+    return new Response(null, { headers: corsHeaders });
   }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
@@ -188,7 +205,7 @@ Deno.serve(async (req) => {
       });
       return new Response(JSON.stringify({ error: "reCAPTCHA verification failed." }), {
         status: 400,
-        headers: { ...CORS, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -202,7 +219,14 @@ Deno.serve(async (req) => {
       });
       return new Response(
         JSON.stringify({ error: "Too many requests. Please try again in an hour." }),
-        { status: 429, headers: { ...CORS, "Content-Type": "application/json" } }
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+            "Retry-After": "3600",
+          },
+        }
       );
     }
 
@@ -220,19 +244,19 @@ Deno.serve(async (req) => {
     if (!data.name || data.name.length < 2) {
       return new Response(JSON.stringify({ error: "Valid name is required." }), {
         status: 422,
-        headers: { ...CORS, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     if (!isEmail(data.email)) {
       return new Response(JSON.stringify({ error: "Valid email is required." }), {
         status: 422,
-        headers: { ...CORS, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
     if (!data.message || data.message.length < 10) {
       return new Response(JSON.stringify({ error: "Message must be at least 10 characters." }), {
         status: 422,
-        headers: { ...CORS, "Content-Type": "application/json" },
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
@@ -254,7 +278,7 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({ success: true, message: "Thank you for your inquiry. Our sales team will contact you within 24 hours." }),
-      { status: 200, headers: { ...CORS, "Content-Type": "application/json" } }
+      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
     console.error("[Edge Function] Error:", err);
@@ -265,7 +289,7 @@ Deno.serve(async (req) => {
     });
     return new Response(
       JSON.stringify({ error: "An unexpected error occurred. Please try again." }),
-      { status: 500, headers: { ...CORS, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
 });

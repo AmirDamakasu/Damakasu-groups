@@ -21,6 +21,8 @@ const products = [
   { name: "Industrial Grade Rice", href: "/products#rice" },
   { name: "Yellow Maize", href: "/products#maize" },
   { name: "Hibiscus Flower", href: "/products#hibiscus" },
+  { name: "Pearl Millet", href: "/products#millet" },
+  { name: "Sorghum", href: "/products#sorghum" },
 ];
 
 const COMPANY_NAME = "DAMAKASU MULTI-LINK INVESTIMENT LTD";

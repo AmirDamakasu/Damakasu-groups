@@ -40,23 +40,23 @@ const values = [
 const team = [
   {
     name: "Alhaji Hassan Damakasu",
-    role: "Chief Executive Officer",
+    role: "Founder, Managing Director & Chief Executive Officer (MD/CEO)",
     image: "/images/team/ceo.jpg",
   },
   {
-    name: "Yarima Bukar",
-    role: "Director of Operations",
+    name: "Yarima Akar Bukar",
+    role: "General Accountant",
     image: "/images/team/operations-director.jpg",
-  },
-  {
-    name: "Muhammad Hassan Damakasu",
-    role: "Head of Quality Assurance",
-    image: "/images/team/quality-head.jpg",
   },
   {
     name: "Nasiru Adamu",
     role: "Procurement & Supply Chain Manager",
     image: "/images/team/procurement-manager.jpg",
+  },
+  {
+    name: "Muhammad Hassan Damakasu",
+    role: "Business Development & Customer Relationship Manager",
+    image: "/images/team/customer-relationship-manager.jpg",
   },
 ];
 
@@ -91,7 +91,7 @@ const About = () => {
                 transition={{ delay: 0.2 }}
                 className="text-primary-foreground/80 text-lg leading-relaxed"
               >
-                We specialize in sourcing, procurement, storage, and distribution of high-quality industrial 
+                We specialize in sourcing, procurement, storage, and distribution of high-quality industrial
                 and agricultural raw materials for manufacturers worldwide.
               </motion.p>
             </div>
@@ -112,21 +112,44 @@ const About = () => {
                 </h2>
                 <div className="space-y-4 text-muted-foreground">
                   <p>
-                    Founded in 2009, RawMat Global Supply Co. began with a clear mission: to bridge the gap 
-                    between raw material suppliers and manufacturing industries worldwide. What started as a 
-                    focused commodity trading operation has grown into one of the region's most trusted 
-                    industrial supply companies.
+                    <strong className="text-foreground">DAMAKASU MULTI-LINKS INVESTMENT LTD</strong> was built on a legacy of hard work,
+                    trust, and entrepreneurial vision.
                   </p>
                   <p>
-                    Today, we serve over 100 manufacturing clients across 40+ countries, supplying more than 
-                    50,000 metric tons of industrial and agricultural raw materials annually. Our commitment to 
-                    quality, supply reliability, and procurement excellence has earned us long-term partnerships 
-                    with leading manufacturers, processors, and FMCG companies.
+                    Our journey began in <strong className="text-foreground">2003</strong>, when our founder started as an independent
+                    trader, buying and selling agricultural commodities and general merchandise across local
+                    markets in Nigeria. Through honesty, consistency, and strong relationships with farmers,
+                    suppliers, and customers, the business steadily expanded and earned a reputation for
+                    reliability.
                   </p>
                   <p>
-                    We believe that reliable raw material supply is the backbone of manufacturing success. 
-                    Our integrated procurement approach helps businesses reduce supply-chain risk, optimize 
-                    costs, and maintain uninterrupted production.
+                    As demand grew and new opportunities emerged in domestic and international trade, the
+                    business was formally incorporated as{" "}
+                    <strong className="text-foreground">DAMAKASU MULTI-LINKS INVESTMENT LTD</strong> in{" "}
+                    <strong className="text-foreground">2015</strong>. This milestone marked our transformation
+                    into a professionally managed company dedicated to delivering high-quality products and
+                    dependable business solutions.
+                  </p>
+                  <p>
+                    Today, we operate across multiple sectors, with a strong focus on the sourcing,
+                    procurement, and supply of premium agricultural commodities—including{" "}
+                    <strong className="text-foreground">
+                      including Sesame Seeds, Ginger, Cashew Nuts, Cocoa Beans, Soybeans, Sorghum, Pearl Millet, Hibiscus Flowers, and other export-grade products
+                    </strong>. We also provide general procurement, import and export services, construction
+                    supplies, and strategic business solutions to clients in Nigeria and international markets.
+                  </p>
+                  <p>
+                    Our success is driven by long-term partnerships with trusted farmers, cooperatives,
+                    processors, manufacturers, and logistics partners. Every product we supply is carefully
+                    sourced and handled to meet international quality standards while ensuring timely delivery
+                    and competitive pricing.
+                  </p>
+                  <p>
+                    As we continue to grow, we remain committed to the values that have guided us since
+                    2003—{" "}
+                    <strong className="text-foreground">
+                      Integrity, Quality, Reliability, Excellence, and Customer Satisfaction
+                    </strong>.
                   </p>
                 </div>
               </motion.div>
@@ -137,20 +160,21 @@ const About = () => {
                 className="grid grid-cols-2 gap-6"
               >
                 <div className="bg-card rounded-2xl p-8 shadow-soft text-center">
-                  <div className="font-serif text-4xl font-bold text-primary mb-2">15+</div>
-                  <div className="text-muted-foreground text-sm">Years of Excellence</div>
+                  <div className="font-serif text-4xl font-bold text-primary mb-2">22+</div>
+                  <div className="text-muted-foreground text-sm">Years Trading Experience</div>
+                  <div className="text-muted-foreground/60 text-xs mt-1">Since 2003</div>
                 </div>
                 <div className="bg-card rounded-2xl p-8 shadow-soft text-center">
-                  <div className="font-serif text-4xl font-bold text-primary mb-2">40+</div>
-                  <div className="text-muted-foreground text-sm">Countries Served</div>
+                  <div className="font-serif text-4xl font-bold text-primary mb-2">2015</div>
+                  <div className="text-muted-foreground text-sm">Official Company Registration</div>
                 </div>
                 <div className="bg-card rounded-2xl p-8 shadow-soft text-center">
-                  <div className="font-serif text-4xl font-bold text-primary mb-2">100+</div>
-                  <div className="text-muted-foreground text-sm">Manufacturing Clients</div>
+                  <div className="font-serif text-4xl font-bold text-primary mb-2">Global</div>
+                  <div className="text-muted-foreground text-sm">Import &amp; Export Operations</div>
                 </div>
                 <div className="bg-card rounded-2xl p-8 shadow-soft text-center">
-                  <div className="font-serif text-4xl font-bold text-primary mb-2">50K+</div>
-                  <div className="text-muted-foreground text-sm">Metric Tons Annually</div>
+                  <div className="font-serif text-4xl font-bold text-primary mb-2">Trusted</div>
+                  <div className="text-muted-foreground text-sm">Farmers, Suppliers &amp; Partners</div>
                 </div>
               </motion.div>
             </div>
@@ -172,9 +196,9 @@ const About = () => {
                 </div>
                 <h3 className="font-serif text-2xl font-bold text-primary-foreground mb-4">Our Mission</h3>
                 <p className="text-primary-foreground/80 leading-relaxed">
-                  To support manufacturers with reliable access to quality raw materials through efficient sourcing, 
-                  strategic partnerships, and world-class supply-chain solutions that enable uninterrupted production 
-                  and sustainable business growth.
+                  To provide high-quality products and dependable business solutions through ethical sourcing,
+                  efficient supply chains, innovation, and exceptional customer service, contributing to
+                  economic growth both locally and internationally.
                 </p>
               </motion.div>
               <motion.div
@@ -189,9 +213,9 @@ const About = () => {
                 </div>
                 <h3 className="font-serif text-2xl font-bold text-accent-foreground mb-4">Our Vision</h3>
                 <p className="text-accent-foreground/80 leading-relaxed">
-                  To become a leading global supplier recognized for reliability, product quality, 
-                  and long-term industrial partnerships — setting the benchmark for procurement excellence 
-                  in manufacturing supply chains worldwide.
+                  To become one of Africa's leading diversified trading and investment companies, connecting
+                  local producers with global markets while delivering sustainable value to our customers,
+                  partners, and communities.
                 </p>
               </motion.div>
             </div>

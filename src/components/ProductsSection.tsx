@@ -7,10 +7,12 @@ import cashewImg from "@/assets/product-cashew.jpg";
 import soybeanImg from "@/assets/product-soybean.jpg";
 import riceImg from "@/assets/product-rice.jpg";
 import maizeImg from "@/assets/product-maize.jpg";
-import hibiscusImg from "@/assets/product-hibiscus.png";
-import coffeeImg from "@/assets/product-coffee.png";
+import hibiscusImg from "@/assets/product-hibiscus.jpg";
+import coffeeImg from "@/assets/product-coffee.jpg";
 import gingerImg from "@/assets/product-ginger.jpg";
 import cocoaImg from "@/assets/product-cocoa.jpg";
+import milletImg from "@/assets/product-millet.jpg";
+import sorghumImg from "@/assets/product-sorghum.jpg";
 
 const products = [
   {
@@ -75,6 +77,20 @@ const products = [
     image: cocoaImg,
     category: "Food Manufacturing",
     slug: "cocoa",
+  },
+  {
+    name: "Pearl Millet",
+    description: "Premium pearl millet sourced from Nigeria's northern growing regions for food manufacturers, animal feed producers, and export markets.",
+    image: milletImg,
+    category: "Staple Grain Supply",
+    slug: "millet",
+  },
+  {
+    name: "Sorghum",
+    description: "High-quality sorghum grain for flour milling, animal feed production, brewing industries, and export.",
+    image: sorghumImg,
+    category: "Industrial Grain Supply",
+    slug: "sorghum",
   },
 ];
 
