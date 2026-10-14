@@ -1,7 +1,8 @@
-import { useCallback, useState, useEffect, useMemo } from "react";
+import { useCallback, useState, useEffect, useMemo, useRef } from "react";
 import type { Session } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
 import { supabase, isSupabaseConfigured, type QuoteRequest } from "@/lib/supabase";
+import { MfaScreen } from "@/components/admin/MfaScreen";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -325,7 +326,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                     <tr key={q.id} className="border-b border-border/30 hover:bg-muted/30 transition-colors">
                       <td className="px-4 py-3">
                         <p className="font-semibold text-foreground">{q.name}</p>
-                        <a href={`mailto:${q.email}`} className="text-secondary text-xs hover:underline flex items-center gap-1 mt-0.5">
+                        <a href={`mailto:${encodeURIComponent(q.email)}`} className="text-secondary text-xs hover:underline flex items-center gap-1 mt-0.5">
                           <Mail className="w-3 h-3" />{q.email}
                         </a>
                       </td>
@@ -347,7 +348,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">
-                          <a href={`mailto:${q.email}?subject=Re: Quote`} className="text-xs bg-secondary/10 text-secondary hover:bg-secondary/20 px-2.5 py-1 rounded-md">Reply</a>
+                          <a href={`mailto:${encodeURIComponent(q.email)}?subject=${encodeURIComponent("Re: Quote")}`} className="text-xs bg-secondary/10 text-secondary hover:bg-secondary/20 px-2.5 py-1 rounded-md">Reply</a>
                           <button onClick={() => setDeleteTargetId(q.id!)} className="text-xs bg-red-50 text-red-600 hover:bg-red-100 px-2.5 py-1 rounded-md flex items-center gap-1">
                             <Trash2 className="w-3 h-3" /> Delete
                           </button>
@@ -381,11 +382,14 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   );
 }
 
-type AdminState = "loading" | "signed-out" | "not-admin" | "admin";
+type AdminState = "loading" | "signed-out" | "not-admin" | "mfa-enroll" | "mfa-verify" | "admin";
+
+const IDLE_LIMIT_MS = 30 * 60 * 1000;
 
 export default function Admin() {
   const [state, setState] = useState<AdminState>("loading");
   const [notice, setNotice] = useState<string>();
+  const resolveRef = useRef<(session: Session | null) => Promise<void>>();
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -407,13 +411,24 @@ export default function Admin() {
         await supabase.auth.signOut();
         return;
       }
+      // The database only returns data to MFA-verified (aal2) admin sessions.
+      const { data: aal, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (cancelled) return;
+      if (aalError) {
+        setNotice(`Could not check two-step sign-in: ${aalError.message}`);
+        setState("signed-out");
+        return;
+      }
       setNotice(undefined);
-      setState("admin");
+      if (aal.currentLevel === "aal2") setState("admin");
+      else if (aal.nextLevel === "aal2") setState("mfa-verify");
+      else setState("mfa-enroll");
     };
+    resolveRef.current = resolve;
 
     supabase.auth.getSession().then(({ data }) => resolve(data.session));
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT") resolve(session);
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "MFA_CHALLENGE_VERIFIED") resolve(session);
     });
     return () => {
       cancelled = true;
@@ -421,7 +436,36 @@ export default function Admin() {
     };
   }, []);
 
+  // Sign out automatically after 30 minutes without activity (e.g. a shared or unattended computer).
+  useEffect(() => {
+    if (state !== "admin") return;
+    let timer = window.setTimeout(expire, IDLE_LIMIT_MS);
+    function expire() {
+      setNotice("You were signed out after 30 minutes of inactivity.");
+      supabase.auth.signOut();
+    }
+    const reset = () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(expire, IDLE_LIMIT_MS);
+    };
+    const events = ["pointerdown", "keydown", "scroll", "visibilitychange"] as const;
+    events.forEach((name) => window.addEventListener(name, reset, { passive: true }));
+    return () => {
+      window.clearTimeout(timer);
+      events.forEach((name) => window.removeEventListener(name, reset));
+    };
+  }, [state]);
+
+  const signOut = () => supabase.auth.signOut();
+  const afterMfa = async () => {
+    const { data } = await supabase.auth.getSession();
+    await resolveRef.current?.(data.session);
+  };
+
   if (state === "loading") return <div className="min-h-screen bg-background" />;
-  if (state === "admin") return <Dashboard onLogout={() => supabase.auth.signOut()} />;
+  if (state === "admin") return <Dashboard onLogout={signOut} />;
+  if (state === "mfa-enroll" || state === "mfa-verify") {
+    return <MfaScreen mode={state === "mfa-enroll" ? "enroll" : "verify"} onVerified={afterMfa} onCancel={signOut} />;
+  }
   return <LoginScreen notice={notice} />;
 }

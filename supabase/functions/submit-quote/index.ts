@@ -61,9 +61,34 @@ function escapeHtml(value: string): string {
 }
 
 // ─── Validate email ────────────────────────────────────────────
+// Deliberately strict (no "?", "&", spaces or quotes) so addresses are safe inside mailto: links.
 function isEmail(s: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+  return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(s);
 }
+
+// Single-line fields: drop line breaks and tabs as well.
+function oneLine(value: string): string {
+  return value.replace(/[\r\n\t]+/g, " ").trim();
+}
+
+// Greeting used in the customer confirmation email: letters, spaces and . ' - only, so the
+// field cannot carry links or other content to an arbitrary recipient.
+function safeGreetingName(name: string): string {
+  return name.replace(/[^\p{L}\p{M} .'-]/gu, "").replace(/\s+/g, " ").trim().slice(0, 60) || "there";
+}
+
+// Client IP: Cloudflare (in front of Supabase) sets cf-connecting-ip and overwrites any value the
+// client sends; x-forwarded-for's first entry can be supplied by the client, so it is a fallback only.
+function clientIp(req: Request): string {
+  return (
+    req.headers.get("cf-connecting-ip") ??
+    req.headers.get("x-real-ip") ??
+    req.headers.get("x-forwarded-for")?.split(",")[0].trim() ??
+    "unknown"
+  ).slice(0, 64);
+}
+
+const MAX_BODY_BYTES = 20_000;
 
 // ─── Resend helper ─────────────────────────────────────────────
 async function sendEmail(to: string, subject: string, html: string) {
@@ -90,29 +115,15 @@ async function sendEmail(to: string, subject: string, html: string) {
 }
 
 // ─── Rate limit check ──────────────────────────────────────────
-async function isRateLimited(ip: string): Promise<boolean> {
-  const windowStart = new Date();
-  windowStart.setMinutes(0, 0, 0); // start of current hour
-
-  const { data } = await supabase
-    .from("rate_limits")
-    .select("count")
-    .eq("ip_address", ip)
-    .eq("window_start", windowStart.toISOString())
-    .maybeSingle();
-
-  if (!data) {
-    await supabase.from("rate_limits").insert({ ip_address: ip, window_start: windowStart.toISOString(), count: 1 });
-    return false;
+// Atomic per-IP, per-hour counter (public.hit_rate_limit). Returns the request's position in the
+// current window; fails closed if the counter cannot be read.
+async function rateLimitCount(ip: string): Promise<number> {
+  const { data, error } = await supabase.rpc("hit_rate_limit", { p_ip: ip });
+  if (error) {
+    console.error("[RateLimit] counter error:", error.message);
+    return Number.MAX_SAFE_INTEGER;
   }
-  if (data.count >= RATE_LIMIT) return true;
-
-  await supabase
-    .from("rate_limits")
-    .update({ count: data.count + 1 })
-    .eq("ip_address", ip)
-    .eq("window_start", windowStart.toISOString());
-  return false;
+  return Number(data);
 }
 
 // ─── reCAPTCHA verification ────────────────────────────────────
@@ -139,7 +150,7 @@ function companyEmailHtml(raw: Record<string, string>) {
   <div style="padding:32px">
     <table style="width:100%;border-collapse:collapse">
       ${row("Full Name", data.name)}
-      ${row("Email Address", `<a href="mailto:${data.email}">${data.email}</a>`)}
+      ${row("Email Address", `<a href="mailto:${encodeURIComponent(raw.email ?? "")}">${data.email}</a>`)}
       ${row("Phone Number", data.phone || "—")}
       ${row("Company Name", data.company || "—")}
       ${row("Product of Interest", data.product || "—")}
@@ -150,7 +161,7 @@ function companyEmailHtml(raw: Record<string, string>) {
       <p style="margin:0;color:#334155;line-height:1.6;white-space:pre-line">${data.message}</p>
     </div>
     <div style="margin-top:24px;text-align:center">
-      <a href="mailto:${data.email}?subject=Re: Your Quote Request" style="background:#2563EB;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Reply to Customer</a>
+      <a href="mailto:${encodeURIComponent(raw.email ?? "")}?subject=Re%3A%20Your%20Quote%20Request" style="background:#2563EB;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Reply to Customer</a>
     </div>
   </div>
   <div style="background:#f1f5f9;padding:16px;text-align:center">
@@ -206,67 +217,62 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "unknown";
+  const json = (status: number, payload: Record<string, unknown>, extra: Record<string, string> = {}) =>
+    new Response(JSON.stringify(payload), { status, headers: { ...corsHeaders, "Content-Type": "application/json", ...extra } });
+
+  if (req.method !== "POST") return json(405, { error: "Method not allowed." }, { Allow: "POST, OPTIONS" });
+
+  const declaredLength = Number(req.headers.get("content-length") ?? "0");
+  if (declaredLength > MAX_BODY_BYTES) return json(413, { error: "Request too large." });
+
+  const ip = clientIp(req);
 
   try {
-    const body = await req.json();
+    // 1. Rate limiting comes first, so nothing below (including logging) can be flooded.
+    const count = await rateLimitCount(ip);
+    if (count > RATE_LIMIT) {
+      if (count === RATE_LIMIT + 1) {
+        // Log only the first rejected request in each window.
+        await supabase.from("security_events").insert({ event_type: "rate_limit_exceeded", ip_address: ip, details: {} });
+      }
+      return json(429, { error: "Too many requests. Please try again in an hour." }, { "Retry-After": "3600" });
+    }
 
-    // 0. Honeypot: the hidden "website" field is only ever filled in by bots. Reply as if accepted
+    const raw = await req.text();
+    if (raw.length > MAX_BODY_BYTES) return json(413, { error: "Request too large." });
+    let body: Record<string, unknown>;
+    try {
+      body = JSON.parse(raw);
+    } catch {
+      return json(400, { error: "Invalid request." });
+    }
+    if (!body || typeof body !== "object" || Array.isArray(body)) return json(400, { error: "Invalid request." });
+
+    // 2. Honeypot: the hidden "website" field is only ever filled in by bots. Reply as if accepted
     //    (so bots learn nothing) but store nothing.
     if (typeof body.website === "string" && body.website.trim() !== "") {
       await supabase.from("security_events").insert({ event_type: "honeypot", ip_address: ip, details: {} });
-      return new Response(
-        JSON.stringify({ success: true, message: "Thank you for your inquiry." }),
-        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-      );
+      return json(200, { success: true, message: "Thank you for your inquiry." });
     }
 
-    // 1. reCAPTCHA
-    const captchaOk = await verifyRecaptcha(body.recaptchaToken ?? "", ip);
+    // 3. reCAPTCHA (skipped until RECAPTCHA_SECRET_KEY is configured)
+    const captchaOk = await verifyRecaptcha(typeof body.recaptchaToken === "string" ? body.recaptchaToken : "", ip);
     if (!captchaOk) {
-      await supabase.from("security_events").insert({
-        event_type: "recaptcha_fail",
-        ip_address: ip,
-        details: { score: "low" },
-      });
-      return new Response(JSON.stringify({ error: "reCAPTCHA verification failed." }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      await supabase.from("security_events").insert({ event_type: "recaptcha_fail", ip_address: ip, details: { score: "low" } });
+      return json(400, { error: "reCAPTCHA verification failed." });
     }
 
-    // 2. Rate limiting
-    const limited = await isRateLimited(ip);
-    if (limited) {
-      await supabase.from("security_events").insert({
-        event_type: "rate_limit_exceeded",
-        ip_address: ip,
-        details: {},
-      });
-      return new Response(
-        JSON.stringify({ error: "Too many requests. Please try again in an hour." }),
-        {
-          status: 429,
-          headers: {
-            ...corsHeaders,
-            "Content-Type": "application/json",
-            "Retry-After": "3600",
-          },
-        }
-      );
-    }
-
-    // 3. Sanitize
+    // 4. Clean
     const data = {
-      name: clean(body.name, 200),
-      email: clean(body.email, 254),
-      phone: clean(body.phone ?? "", 40),
-      company: clean(body.company ?? "", 200),
-      product: clean(body.product ?? "", 200),
+      name: oneLine(clean(body.name, 200)),
+      email: oneLine(clean(body.email, 254)),
+      phone: oneLine(clean(body.phone ?? "", 40)),
+      company: oneLine(clean(body.company ?? "", 200)),
+      product: oneLine(clean(body.product ?? "", 200)),
       message: clean(body.message, 6000),
     };
 
-    // 4. Server-side validation (mirrors the database CHECK constraints)
+    // 5. Server-side validation (mirrors the database CHECK constraints)
     if (data.name.length < 2 || data.name.length > 100) {
       return new Response(JSON.stringify({ error: "Name must be between 2 and 100 characters." }), {
         status: 422,
@@ -286,7 +292,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // 5. Store in database
+    // 6. Store in database
     const { error: dbError } = await supabase
       .from("quote_requests")
       .insert({ ...data, ip_address: ip, status: "pending" });
@@ -296,26 +302,22 @@ Deno.serve(async (req) => {
       throw new Error("Database error");
     }
 
-    // 6. Send emails (non-blocking — don't fail submission if email fails)
+    // 7. Emails (failures don't fail the submission). The customer confirmation goes to an address
+    //    the visitor typed, so it is only sent once reCAPTCHA is verifying, to avoid being used as a
+    //    relay to send mail from our domain to arbitrary people.
     await Promise.allSettled([
-      sendEmail(COMPANY_EMAIL, `New Quote Request - ${data.name}`, companyEmailHtml(data)),
-      sendEmail(data.email, "Quote Request Received", customerEmailHtml(data.name)),
+      sendEmail(COMPANY_EMAIL, `New Quote Request - ${data.name.slice(0, 80)}`, companyEmailHtml(data)),
+      RECAPTCHA_SECRET ? sendEmail(data.email, "Quote Request Received", customerEmailHtml(safeGreetingName(data.name))) : Promise.resolve(),
     ]);
 
-    return new Response(
-      JSON.stringify({ success: true, message: "Thank you for your inquiry. Our sales team will contact you within 24 hours." }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json(200, { success: true, message: "Thank you for your inquiry. Our sales team will contact you within 24 hours." });
   } catch (err) {
     console.error("[Edge Function] Error:", err);
     await supabase.from("security_events").insert({
       event_type: "submission_error",
       ip_address: ip,
-      details: { error: String(err) },
+      details: { error: String(err).slice(0, 500) },
     });
-    return new Response(
-      JSON.stringify({ error: "An unexpected error occurred. Please try again." }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-    );
+    return json(500, { error: "An unexpected error occurred. Please try again." });
   }
 });

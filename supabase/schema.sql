@@ -6,8 +6,8 @@
 -- Access model
 --   * Website visitors (anon key) cannot read or write any table directly.
 --   * Quote requests are inserted only by the submit-quote Edge Function (service role).
---   * Signed-in admins (Supabase Auth users listed in public.admin_users) can read quote
---     requests, change their status and delete them. Nothing else.
+--   * Signed-in admins (Supabase Auth users listed in public.admin_users) who have completed
+--     two-step sign-in (MFA) can read quote requests, change their status and delete them.
 -- ============================================================
 
 -- ─── Tables ─────────────────────────────────────────────────
@@ -81,6 +81,22 @@ $$;
 REVOKE ALL ON FUNCTION public.is_admin() FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.is_admin() TO authenticated;
 
+-- is_admin() answers "is this user on the admin list?" (used by the dashboard to decide whether to
+-- offer MFA set-up). Data access additionally requires the session to be MFA-verified (aal2), so a
+-- stolen password alone cannot read or change quote requests.
+CREATE OR REPLACE FUNCTION public.is_admin_mfa()
+RETURNS BOOLEAN
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT public.is_admin() AND coalesce((SELECT auth.jwt() ->> 'aal'), '') = 'aal2';
+$$;
+
+REVOKE ALL ON FUNCTION public.is_admin_mfa() FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.is_admin_mfa() TO authenticated;
+
 CREATE OR REPLACE FUNCTION public.cleanup_old_rate_limits()
 RETURNS void
 LANGUAGE plpgsql
@@ -125,13 +141,13 @@ CREATE POLICY "deny_anon_security_events_all" ON public.security_events FOR ALL 
 -- Admin dashboard access (signed-in users listed in admin_users).
 DROP POLICY IF EXISTS "admins_select_quotes" ON public.quote_requests;
 CREATE POLICY "admins_select_quotes" ON public.quote_requests
-  FOR SELECT TO authenticated USING ((SELECT public.is_admin()));
+  FOR SELECT TO authenticated USING ((SELECT public.is_admin_mfa()));
 DROP POLICY IF EXISTS "admins_update_quotes" ON public.quote_requests;
 CREATE POLICY "admins_update_quotes" ON public.quote_requests
-  FOR UPDATE TO authenticated USING ((SELECT public.is_admin())) WITH CHECK ((SELECT public.is_admin()));
+  FOR UPDATE TO authenticated USING ((SELECT public.is_admin_mfa())) WITH CHECK ((SELECT public.is_admin_mfa()));
 DROP POLICY IF EXISTS "admins_delete_quotes" ON public.quote_requests;
 CREATE POLICY "admins_delete_quotes" ON public.quote_requests
-  FOR DELETE TO authenticated USING ((SELECT public.is_admin()));
+  FOR DELETE TO authenticated USING ((SELECT public.is_admin_mfa()));
 -- admin_users, rate_limits and security_events have no client policies: service role / SQL editor only.
 
 -- ─── Indexes ────────────────────────────────────────────────
@@ -145,3 +161,31 @@ CREATE INDEX IF NOT EXISTS idx_quote_requests_email ON public.quote_requests (em
 --    INSERT INTO public.admin_users (user_id)
 --    SELECT id FROM auth.users WHERE email = 'you@example.com'
 --    ON CONFLICT DO NOTHING;
+
+-- ─── Atomic rate limiting (used by the submit-quote Edge Function) ───
+-- Increments and returns the caller IP's request count for the current hour in one statement, so
+-- concurrent requests cannot slip past the limit. Old windows are pruned opportunistically.
+CREATE OR REPLACE FUNCTION public.hit_rate_limit(p_ip TEXT)
+RETURNS INTEGER
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+DECLARE
+  current_count INTEGER;
+BEGIN
+  INSERT INTO public.rate_limits AS r (ip_address, window_start, count)
+  VALUES (left(p_ip, 64), date_trunc('hour', NOW()), 1)
+  ON CONFLICT (ip_address, window_start) DO UPDATE SET count = r.count + 1
+  RETURNING r.count INTO current_count;
+
+  IF random() < 0.02 THEN
+    DELETE FROM public.rate_limits WHERE window_start < NOW() - INTERVAL '2 hours';
+    DELETE FROM public.security_events WHERE created_at < NOW() - INTERVAL '180 days';
+  END IF;
+
+  RETURN current_count;
+END;
+$$;
+
+REVOKE ALL ON FUNCTION public.hit_rate_limit(TEXT) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.hit_rate_limit(TEXT) TO service_role;

@@ -1,6 +1,19 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
+import type { Plugin } from "vite";
+
+// The production CSP (index.html <meta> + public/.htaccess) allows no inline scripts. The dev
+// server's React Refresh preamble is inline, so relax the meta copy only while serving locally.
+const devInlineScripts = (): Plugin => ({
+  name: "dev-csp-inline-scripts",
+  apply: "serve",
+  transformIndexHtml: (html) =>
+    html.replace("script-src 'self'", "script-src 'self' 'unsafe-inline' 'unsafe-eval'").replace(
+      "connect-src 'self'",
+      "connect-src 'self' ws: wss: http://127.0.0.1:54321",
+    ),
+});
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -28,7 +41,7 @@ export default defineConfig({
       ].join("; "),
     },
   },
-  plugins: [react()],
+  plugins: [react(), devInlineScripts()],
   // The build-time prerender (scripts/prerender.mjs) bundles all dependencies into one SSR file.
   ssr: { noExternal: true },
   resolve: {

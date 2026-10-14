@@ -46,6 +46,12 @@ ErrorDocument 404 /404.html
   Header always set X-Frame-Options "DENY"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  Header always set Cross-Origin-Opener-Policy "same-origin"
+  # Browsers must use HTTPS for this site for a year (add includeSubDomains only once every
+  # subdomain serves HTTPS).
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # Content Security Policy — keep in sync with the <meta> copy in index.html.
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' https://www.google.com https://www.gstatic.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https://www.google.com https://www.gstatic.com; connect-src 'self' https://*.supabase.co https://www.google.com; frame-src https://www.google.com https://recaptcha.google.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests"
 
   <FilesMatch "^(admin|404)\.html$">
     Header set X-Robots-Tag "noindex, follow"

@@ -1,6 +1,6 @@
-/** Basic email format validation. */
+/** Email format validation — same rule as the submit-quote function (no "?", "&", spaces or quotes). */
 export function isValidEmail(email: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  return /^[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}$/.test(email);
 }
 
 /** Basic phone number validation (allows +, digits, spaces, dashes, brackets). */
