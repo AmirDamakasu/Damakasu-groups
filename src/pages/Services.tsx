@@ -101,7 +101,7 @@ const Services = () => {
               <motion.span
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-secondary font-medium text-sm uppercase tracking-wider"
+                className="text-blue-400 font-medium text-sm uppercase tracking-wider"
               >
                 Our Services
               </motion.span>

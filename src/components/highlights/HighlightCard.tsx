@@ -73,6 +73,8 @@ export const HighlightCard = forwardRef<HTMLButtonElement, HighlightCardProps>((
     >
       <img
         src={highlight.image}
+        srcSet={`${highlight.image.replace(/\.jpg$/, "-640.webp")} 640w, ${highlight.image.replace(/\.jpg$/, ".webp")} ${highlight.width ?? 1200}w`}
+        sizes={feature ? "(min-width: 1024px) 50vw, 100vw" : "(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"}
         alt={highlight.alt}
         width={highlight.width}
         height={highlight.height}

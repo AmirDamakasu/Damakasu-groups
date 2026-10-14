@@ -89,13 +89,13 @@ export function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h4 className="font-serif text-lg font-semibold mb-6">Quick Links</h4>
+            <h2 className="font-serif text-lg font-semibold mb-6">Quick Links</h2>
             <ul className="space-y-3">
               {quickLinks.map((link) => (
                 <li key={link.name}>
                   <Link
                     to={link.href}
-                    className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm"
+                    className="text-primary-foreground/80 hover:text-blue-300 transition-colors text-sm"
                   >
                     {link.name}
                   </Link>
@@ -106,13 +106,13 @@ export function Footer() {
 
           {/* Products */}
           <div>
-            <h4 className="font-serif text-lg font-semibold mb-6">Our Products</h4>
+            <h2 className="font-serif text-lg font-semibold mb-6">Our Products</h2>
             <ul className="space-y-3">
               {products.map((product) => (
                 <li key={product.name}>
                   <Link
                     to={product.href}
-                    className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm"
+                    className="text-primary-foreground/80 hover:text-blue-300 transition-colors text-sm"
                   >
                     {product.name}
                   </Link>
@@ -123,7 +123,7 @@ export function Footer() {
 
           {/* Contact */}
           <div className="min-w-0">
-            <h4 className="font-serif text-lg font-semibold mb-6">Contact Us</h4>
+            <h2 className="font-serif text-lg font-semibold mb-6">Contact Us</h2>
             <ul className="space-y-4">
               {LOCATIONS.map((location) => (
                 <li key={location.title} className="flex items-start gap-3">
@@ -132,11 +132,11 @@ export function Footer() {
                     href={location.mapsUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm"
+                    className="text-primary-foreground/80 hover:text-blue-300 transition-colors text-sm"
                   >
                     <span className="block font-semibold text-primary-foreground">{location.title}</span>
                     {location.lines.join(", ")}
-                    <span className="mt-0.5 block text-xs text-secondary">View on Google Maps →</span>
+                    <span className="mt-0.5 block text-xs text-blue-300">View on Google Maps →</span>
                     <span className="sr-only">(opens in a new tab)</span>
                   </a>
                 </li>
@@ -144,7 +144,7 @@ export function Footer() {
               {PHONES.map((phone) => (
                 <li key={phone.href} className="flex items-center gap-3">
                   <Phone className="w-5 h-5 text-secondary shrink-0" aria-hidden="true" />
-                  <a href={phone.href} aria-label={`Call ${phone.display}`} className="inline-flex min-h-10 items-center text-primary-foreground/80 hover:text-secondary transition-colors text-sm">
+                  <a href={phone.href} aria-label={`Call ${phone.display}`} className="inline-flex min-h-10 items-center text-primary-foreground/80 hover:text-blue-300 transition-colors text-sm">
                     {phone.display}
                   </a>
                 </li>
@@ -158,7 +158,7 @@ export function Footer() {
                   <a
                     href={email.href}
                     aria-label={`Email ${email.address}`}
-                    className={`inline-flex min-h-10 min-w-0 items-center text-sm underline-offset-4 hover:underline hover:text-secondary transition-colors ${
+                    className={`inline-flex min-h-10 min-w-0 items-center text-sm underline-offset-4 hover:underline hover:text-blue-300 transition-colors ${
                       email.primary ? "font-semibold text-primary-foreground" : "text-primary-foreground/80"
                     }`}
                   >
@@ -185,10 +185,10 @@ export function Footer() {
             © {new Date().getFullYear()} {COMPANY_NAME}. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link to="/privacy-policy" className="text-primary-foreground/60 hover:text-secondary transition-colors text-sm">
+            <Link to="/privacy-policy" className="inline-flex min-h-11 items-center text-primary-foreground/60 hover:text-blue-300 transition-colors text-sm">
               Privacy Policy
             </Link>
-            <Link to="/terms-of-service" className="text-primary-foreground/60 hover:text-secondary transition-colors text-sm">
+            <Link to="/terms-of-service" className="inline-flex min-h-11 items-center text-primary-foreground/60 hover:text-blue-300 transition-colors text-sm">
               Terms of Service
             </Link>
           </div>

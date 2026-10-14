@@ -123,7 +123,7 @@ export function MarketsSection({ cta = { label: "Explore Our Markets", to: "/mar
             </p>
             <Link
               to={cta.to}
-              className="group mt-8 inline-flex items-center text-sm font-bold text-emerald-700 transition-colors hover:text-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-4"
+              className="group mt-8 inline-flex min-h-11 items-center text-sm font-bold text-emerald-700 transition-colors hover:text-emerald-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-700 focus-visible:ring-offset-4"
             >
               {cta.label}
               <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1" aria-hidden="true">

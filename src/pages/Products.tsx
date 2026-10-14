@@ -4,11 +4,36 @@ import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Search, PackageSearch } from "lucide-react";
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { FilterPills } from "@/components/highlights/FilterPills";
 
-import { products, productPath } from "@/data/products";
+import { products, productPath, PRODUCT_GROUPS, type ProductGroup } from "@/data/products";
+
+type GroupFilter = "all" | ProductGroup;
+const GROUP_FILTERS: { value: GroupFilter; label: string }[] = [
+  { value: "all", label: "All Products" },
+  ...PRODUCT_GROUPS.map((group) => ({ value: group, label: group })),
+];
+
+// Matches words that start with the query, so "oil" finds "oil extraction" but not "parboiled".
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+const matches = (query: string, ...fields: string[]) => {
+  const pattern = new RegExp(`(^|[^a-z])${escapeRegExp(query)}`, "i");
+  return fields.some((field) => pattern.test(field));
+};
 
 const Products = () => {
+  const [group, setGroup] = useState<GroupFilter>("all");
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLowerCase();
+  const visible = products.filter(
+    (product) =>
+      (group === "all" || product.group === group) &&
+      (!q || matches(q, product.name, product.summary, product.category, ...product.grades, ...product.applications)),
+  );
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -21,7 +46,7 @@ const Products = () => {
               <motion.span
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="text-secondary font-medium text-sm uppercase tracking-wider"
+                className="text-blue-400 font-medium text-sm uppercase tracking-wider"
               >
                 Our Catalog
               </motion.span>
@@ -49,8 +74,56 @@ const Products = () => {
         {/* Products List */}
         <section className="py-24 bg-gradient-earth bg-grain">
           <div className="container mx-auto px-4 lg:px-8">
-            <div className="space-y-24">
-              {products.map((product, index) => (
+            {/* Catalogue search & filters */}
+            <div className="mx-auto mb-14 max-w-4xl space-y-5 rounded-2xl border border-border/60 bg-card p-5 shadow-soft sm:p-6">
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
+                <Input
+                  type="search"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search commodities, grades or uses — e.g. hulled, feed, oil"
+                  aria-label="Search products"
+                  className="h-12 pl-9"
+                />
+              </div>
+              <FilterPills<GroupFilter>
+                options={GROUP_FILTERS}
+                value={group}
+                onChange={setGroup}
+                panelId="product-list"
+                label="Filter products by group"
+              />
+              <p className="text-center text-sm text-muted-foreground" aria-live="polite">
+                Showing {visible.length} of {products.length} commodities
+              </p>
+            </div>
+
+            {visible.length === 0 && (
+              <div className="mx-auto max-w-xl rounded-2xl border border-dashed border-emerald-700/30 bg-card p-10 text-center">
+                <PackageSearch className="mx-auto h-10 w-10 text-emerald-700/60" aria-hidden="true" />
+                <h2 className="mt-4 font-serif text-2xl font-bold text-primary">No matching commodities</h2>
+                <p className="mt-2 text-muted-foreground">
+                  Looking for something not listed? Tell us what you need and we will confirm what we can source.
+                </p>
+                <div className="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+                  <Button variant="gold" asChild>
+                    <Link to="/contact#inquiry">Send an Inquiry</Link>
+                  </Button>
+                  <Button variant="outline" onClick={() => { setQuery(""); setGroup("all"); }}>
+                    Show all products
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            <div
+              id="product-list"
+              role="tabpanel"
+              aria-labelledby={`product-list-tab-${GROUP_FILTERS.findIndex((f) => f.value === group)}`}
+              className="space-y-24"
+            >
+              {visible.map((product, index) => (
                 <motion.div
                   key={product.slug}
                   id={product.anchor}
@@ -66,7 +139,10 @@ const Products = () => {
                     <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-medium border border-border/40">
                       <img
                         src={product.image}
+                        srcSet={product.imageSrcSet}
+                        sizes="(min-width: 1024px) 50vw, 100vw"
                         alt={product.imageAlt}
+                        decoding="async"
                         loading={index === 0 ? "eager" : "lazy"}
                         className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
                       />

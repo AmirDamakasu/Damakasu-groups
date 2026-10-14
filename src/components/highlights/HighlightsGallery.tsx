@@ -71,11 +71,13 @@ export function HighlightsGallery() {
             />
           </div>
 
-          <motion.ul
-            layout={!reduceMotion}
+          <div
             id="highlights-grid"
             role="tabpanel"
             aria-labelledby={`highlights-grid-tab-${FILTERS.findIndex((f) => f.value === filter)}`}
+          >
+          <motion.ul
+            layout={!reduceMotion}
             className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-flow-dense lg:grid-cols-4 lg:auto-rows-[180px]"
           >
             <AnimatePresence mode="popLayout" initial={false}>
@@ -118,6 +120,7 @@ export function HighlightsGallery() {
               })}
             </AnimatePresence>
           </motion.ul>
+          </div>
         </div>
       </div>
 

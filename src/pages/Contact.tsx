@@ -4,7 +4,7 @@ import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { motion, useReducedMotion } from "framer-motion";
 import { useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
+import { useRecaptcha } from "@/hooks/use-recaptcha";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,9 +13,8 @@ import {
   Mail, Phone, MapPin, Clock, Send, ExternalLink, Navigation,
   CheckCircle, AlertCircle, Loader2, ArrowRight,
 } from "lucide-react";
-import { sanitizeFormData, isValidEmail, isValidPhone } from "@/lib/sanitize";
-import { supabase, isSupabaseConfigured } from "@/lib/supabase";
-import { FunctionsHttpError } from "@supabase/supabase-js";
+import { isValidEmail, isValidPhone } from "@/lib/validation";
+import { isSupabaseConfigured } from "@/lib/supabase-config";
 import {
   COMPANY_NAME, PRIMARY_EMAIL, PRIMARY_EMAIL_HREF, SECONDARY_EMAIL, SECONDARY_EMAIL_HREF,
   PHONES, LOCATIONS, WHATSAPP_LINK,
@@ -84,7 +83,7 @@ const buildEmailFallback = (data: FormState) => {
 
 // ─── Inner form component (uses reCAPTCHA hook) ────────────────
 function QuoteForm() {
-  const { executeRecaptcha } = useGoogleReCaptcha();
+  const recaptcha = useRecaptcha(RECAPTCHA_SITE_KEY);
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState(() => {
     // Product pages link here with ?product=<slug>, and "Become a Supplier" buttons with ?type=supplier.
@@ -139,11 +138,17 @@ function QuoteForm() {
     submittingRef.current = true;
     setIsSubmitting(true);
     try {
+      // Loaded on submit so the Supabase client and DOMPurify stay out of every page's initial download.
+      const [{ sanitizeFormData }, { supabase }, { FunctionsHttpError }] = await Promise.all([
+        import("@/lib/sanitize"),
+        import("@/lib/supabase"),
+        import("@supabase/supabase-js"),
+      ]);
       const { inquiryType, quantity, destination, deliveryTerms, specifications, ...rest } = sanitizeFormData(formData);
 
       let recaptchaToken = "";
-      if (executeRecaptcha) {
-        recaptchaToken = await executeRecaptcha("quote_form");
+      if (RECAPTCHA_SITE_KEY) {
+        recaptchaToken = await recaptcha.execute("quote_form");
       }
 
       // The backend stores a fixed set of fields, so the extra inquiry details travel with the message.
@@ -237,7 +242,7 @@ function QuoteForm() {
         Fields marked * are required. We reply to business inquiries as quickly as possible.
       </p>
 
-      <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+      <form onSubmit={handleSubmit} onFocusCapture={recaptcha.prime} className="space-y-5" noValidate>
         <div className="grid gap-5 md:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="name">Full Name *</Label>
@@ -392,7 +397,6 @@ const Contact = () => {
   ];
 
   return (
-    <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
       <div className="min-h-screen bg-background">
         <Navbar />
         <main className="pt-20">
@@ -402,7 +406,7 @@ const Contact = () => {
             <div className="container relative z-10 mx-auto px-4 lg:px-8">
               <div className="mx-auto max-w-3xl text-center">
                 <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                  className="text-sm font-medium uppercase tracking-wider text-secondary">
+                  className="text-sm font-medium uppercase tracking-wider text-blue-400">
                   Get in Touch
                 </motion.span>
                 <motion.h1 initial={{ opacity: 0, y: reduceMotion ? 0 : 20 }} animate={{ opacity: 1, y: 0 }}
@@ -564,7 +568,6 @@ const Contact = () => {
         <Footer />
         <FloatingWhatsApp />
       </div>
-    </GoogleReCaptchaProvider>
   );
 };
 

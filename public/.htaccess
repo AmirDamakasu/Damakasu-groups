@@ -1,6 +1,11 @@
 Options -MultiViews -Indexes
 DirectoryIndex index.html
 
+# Never serve server configuration files.
+<FilesMatch "^\.ht">
+  Require all denied
+</FilesMatch>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

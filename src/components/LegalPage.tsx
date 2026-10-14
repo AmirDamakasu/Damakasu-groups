@@ -34,7 +34,7 @@ export function LegalPage({ title, effectiveDate, company, sections, contact, re
           <div className="absolute inset-0 bg-grain opacity-20" />
           <div className="container relative z-10 mx-auto px-4 lg:px-8">
             <div className="mx-auto max-w-3xl text-center">
-              <p className="text-sm font-medium uppercase tracking-wider text-secondary">Legal</p>
+              <p className="text-sm font-medium uppercase tracking-wider text-blue-400">Legal</p>
               <h1 className="mt-3 font-serif text-4xl font-bold text-primary-foreground md:text-5xl">{title}</h1>
               <p className="mt-5 text-sm text-primary-foreground/75">
                 Effective Date: {effectiveDate}

@@ -41,7 +41,7 @@ const ProductDetail = () => {
               className="text-primary-foreground"
               items={[{ name: "Products", to: "/products" }, { name: product.name }]}
             />
-            <p className="mt-8 text-sm font-medium uppercase tracking-wider text-secondary">{product.category}</p>
+            <p className="mt-8 text-sm font-medium uppercase tracking-wider text-blue-400">{product.category}</p>
             <h1 className="mt-3 max-w-3xl font-serif text-4xl font-bold text-primary-foreground md:text-5xl">
               {product.h1}
             </h1>
@@ -52,20 +52,20 @@ const ProductDetail = () => {
         <section className="bg-cream py-12 md:py-20">
           <div className="container mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-2 lg:px-8">
             <div className="overflow-hidden rounded-2xl border border-border/40 shadow-medium lg:self-start">
-              <img src={product.image} alt={product.imageAlt} className="aspect-[4/3] h-full w-full object-cover" />
+              <img src={product.image} srcSet={product.imageSrcSet} sizes="(min-width: 1024px) 50vw, 100vw" alt={product.imageAlt} className="aspect-[4/3] h-full w-full object-cover" />
             </div>
 
             <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-soft sm:p-8">
               <dl className="space-y-5">
                 {facts.map((fact) => (
-                  <div key={fact.label} className="flex gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
-                      <fact.icon className="h-5 w-5" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <dt className="text-sm font-bold text-primary">{fact.label}</dt>
-                      <dd className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{fact.value}</dd>
-                    </div>
+                  <div key={fact.label} className="relative min-h-10 pl-14">
+                    <dt className="text-sm font-bold text-primary">
+                      <span className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700" aria-hidden="true">
+                        <fact.icon className="h-5 w-5" />
+                      </span>
+                      {fact.label}
+                    </dt>
+                    <dd className="mt-0.5 text-sm leading-relaxed text-muted-foreground">{fact.value}</dd>
                   </div>
                 ))}
               </dl>
@@ -166,7 +166,7 @@ const ProductDetail = () => {
                           to={productPath(item)}
                           className="group flex items-center gap-4 rounded-xl border border-border/60 bg-card p-3 shadow-soft transition-shadow hover:shadow-medium"
                         >
-                          <img src={item.image} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" loading="lazy" />
+                          <img src={item.image} srcSet={item.imageSrcSet} sizes="56px" alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" loading="lazy" decoding="async" />
                           <span className="min-w-0">
                             <span className="block font-semibold text-primary group-hover:text-emerald-800">{item.name}</span>
                             <span className="line-clamp-1 text-sm text-muted-foreground">{item.summary}</span>

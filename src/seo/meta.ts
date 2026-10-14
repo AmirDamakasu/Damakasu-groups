@@ -91,7 +91,7 @@ const staticPages: Record<string, RouteMeta> = {
     path: "/",
     title: "Damakasu Multi-Link Investment Ltd | Nigerian Agricultural Commodities Supplier",
     description:
-      "Damakasu Multi-Link Investment Ltd connects agricultural commodity buyers and suppliers through sourcing, trading and supply opportunities for Nigerian sesame seeds, soybeans, sorghum, ginger, hibiscus and other agricultural products, subject to availability.",
+      "Damakasu Multi-Link Investment Ltd sources Nigerian sesame seeds, soybeans, sorghum, ginger, hibiscus and other agricultural commodities for buyers worldwide.",
     jsonLd: [organization, website],
   },
   "/about": page(
@@ -115,7 +115,7 @@ const staticPages: Record<string, RouteMeta> = {
   "/markets": page(
     "/markets",
     "International Markets for Nigerian Agricultural Commodities | Damakasu",
-    "How Damakasu Multi-Link Investment Ltd connects Nigerian sesame, soybeans, ginger, hibiscus and other commodities with buyers in India, Canada, China, Japan, the Middle East and Europe.",
+    "How Damakasu connects Nigerian sesame, soybeans, ginger, hibiscus and other commodities with buyers in India, Canada, China, Japan, the Middle East and Europe.",
     "Markets",
   ),
   "/contact": page(

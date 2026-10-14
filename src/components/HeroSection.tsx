@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Globe, Shield, Truck, CheckCircle } from "lucide-react";
 import heroImage from "@/assets/hero-farm.webp";
+import heroImageSmall from "@/assets/hero-farm-800.webp";
 
 export function HeroSection() {
   return (
@@ -11,6 +12,8 @@ export function HeroSection() {
       <div className="absolute inset-0">
         <img
           src={heroImage}
+          srcSet={`${heroImageSmall} 800w, ${heroImage} 1600w`}
+          sizes="100vw"
           alt=""
           {...{ fetchpriority: "high" }}
           className="w-full h-full object-cover"
@@ -30,30 +33,30 @@ export function HeroSection() {
       <div className="container relative z-10 mx-auto px-4 lg:px-8 pt-20">
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <span className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/20 border border-secondary/30 rounded-full text-secondary text-sm font-medium mb-8">
+            <span className="inline-flex items-center gap-2 px-4 py-2 bg-secondary/20 border border-secondary/30 rounded-full text-blue-300 text-sm font-medium mb-8">
               <Globe className="w-4 h-4" />
               Trusted Industrial Supply Partner
             </span>
           </motion.div>
 
           <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             className="font-serif text-4xl md:text-5xl lg:text-7xl font-bold text-primary-foreground leading-tight mb-6"
           >
             Nigerian Agricultural Commodity
             <br />
-            <span className="text-secondary">Sourcing and Supply</span>
+            <span className="text-blue-400">Sourcing and Supply</span>
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
@@ -63,8 +66,8 @@ export function HeroSection() {
           </motion.p>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ y: 12 }}
+            animate={{ y: 0 }}
             transition={{ duration: 0.6, delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
@@ -103,7 +106,7 @@ export function HeroSection() {
                 <item.icon className="w-6 h-6 text-secondary" />
               </div>
               <div>
-                <h3 className="font-semibold text-primary-foreground">{item.title}</h3>
+                <p className="font-semibold text-primary-foreground">{item.title}</p>
                 <p className="text-sm text-primary-foreground/70">{item.desc}</p>
               </div>
             </div>

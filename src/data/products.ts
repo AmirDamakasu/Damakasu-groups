@@ -10,14 +10,30 @@ import cocoaImg from "@/assets/product-cocoa.jpg";
 import milletImg from "@/assets/product-millet.jpg";
 import sorghumImg from "@/assets/product-sorghum.jpg";
 
+// WebP renditions (full width and 640px) generated next to each JPEG; the JPEG stays the fallback
+// and is used for social previews.
+const webpFiles = import.meta.glob("../assets/product-*.webp", { eager: true, import: "default" }) as Record<string, string>;
+const webpSrcSet = (file: string, width: number) => {
+  const small = webpFiles[`../assets/${file}-640.webp`];
+  const full = webpFiles[`../assets/${file}.webp`];
+  return width > 640 ? `${small} 640w, ${full} ${width}w` : `${full} ${width}w`;
+};
+
+export const PRODUCT_GROUPS = ["Oilseeds & Legumes", "Grains & Cereals", "Spices & Botanicals", "Nuts, Cocoa & Coffee"] as const;
+export type ProductGroup = (typeof PRODUCT_GROUPS)[number];
+
 export type Product = {
   slug: string;
+  /** Buyer-facing grouping used by the catalogue filters. */
+  group: ProductGroup;
   /** Anchor used by the old single-page catalogue (/products#anchor); kept so old links still work. */
   anchor: string;
   name: string;
   h1: string;
   category: string;
   image: string;
+  /** Responsive WebP sources for <img srcSet>. */
+  imageSrcSet: string;
   imageAlt: string;
   summary: string;
   description: string[];
@@ -37,11 +53,13 @@ const DEFAULT_STATUS =
 export const products: Product[] = [
   {
     slug: "sesame-seeds",
+    group: "Oilseeds & Legumes",
     anchor: "sesame",
     name: "Sesame Seeds",
     h1: "Nigerian Sesame Seeds",
     category: "Food Manufacturing",
     image: sesameImg,
+    imageSrcSet: webpSrcSet("product-sesame", 1018),
     imageAlt: "Natural white sesame seeds from Nigeria",
     summary: "Natural white, hulled and black sesame seeds for food manufacturing, oil extraction and processing.",
     description: [
@@ -60,11 +78,13 @@ export const products: Product[] = [
   },
   {
     slug: "cashew-nuts",
+    group: "Nuts, Cocoa & Coffee",
     anchor: "cashew",
     name: "Cashew Nuts",
     h1: "Nigerian Cashew Nuts",
     category: "Export Quality",
     image: cashewImg,
+    imageSrcSet: webpSrcSet("product-cashew", 1200),
     imageAlt: "Raw cashew nuts sourced in Nigeria",
     summary: "Raw cashew nuts and kernel grades for processors, food manufacturers and international buyers.",
     description: [
@@ -83,11 +103,13 @@ export const products: Product[] = [
   },
   {
     slug: "soybeans",
+    group: "Oilseeds & Legumes",
     anchor: "soybeans",
     name: "Soybeans",
     h1: "Nigerian Soybeans",
     category: "Industrial Supply",
     image: soybeanImg,
+    imageSrcSet: webpSrcSet("product-soybean", 1018),
     imageAlt: "Dried soybeans for oil extraction and animal feed",
     summary: "Soybeans for oil extraction, animal feed production and food processing.",
     description: [
@@ -106,11 +128,13 @@ export const products: Product[] = [
   },
   {
     slug: "rice",
+    group: "Grains & Cereals",
     anchor: "rice",
     name: "Industrial Grade Rice",
     h1: "Industrial Grade Rice",
     category: "Food Processing",
     image: riceImg,
+    imageSrcSet: webpSrcSet("product-rice", 554),
     imageAlt: "Long grain white rice for bulk food processing",
     summary: "Bulk rice supply for food processing and manufacturing industries.",
     description: [
@@ -129,11 +153,13 @@ export const products: Product[] = [
   },
   {
     slug: "yellow-maize",
+    group: "Grains & Cereals",
     anchor: "maize",
     name: "Yellow Maize",
     h1: "Nigerian Yellow Maize",
     category: "Industrial Processing",
     image: maizeImg,
+    imageSrcSet: webpSrcSet("product-maize", 447),
     imageAlt: "Yellow maize grain for feed mills and food processing",
     summary: "Yellow maize for feed mills, food production and industrial processing.",
     description: [
@@ -152,11 +178,13 @@ export const products: Product[] = [
   },
   {
     slug: "dried-hibiscus",
+    group: "Spices & Botanicals",
     anchor: "hibiscus",
     name: "Dried Hibiscus Flowers",
     h1: "Nigerian Dried Hibiscus Flowers",
     category: "Export Product",
     image: hibiscusImg,
+    imageSrcSet: webpSrcSet("product-hibiscus", 612),
     imageAlt: "Dried hibiscus flower calyces from Nigeria",
     summary: "Dried hibiscus calyces for beverage production, herbal processing and food ingredients.",
     description: [
@@ -175,11 +203,13 @@ export const products: Product[] = [
   },
   {
     slug: "coffee-beans",
+    group: "Nuts, Cocoa & Coffee",
     anchor: "coffee",
     name: "Coffee Beans",
     h1: "Coffee Beans",
     category: "Sourcing on Request",
     image: coffeeImg,
+    imageSrcSet: webpSrcSet("product-coffee", 800),
     imageAlt: "Green coffee beans for roasters and distributors",
     summary: "Coffee bean sourcing for roasters, processors and distributors, on request.",
     description: [
@@ -198,11 +228,13 @@ export const products: Product[] = [
   },
   {
     slug: "ginger",
+    group: "Spices & Botanicals",
     anchor: "ginger",
     name: "Dried Ginger",
     h1: "Nigerian Dried Ginger",
     category: "Industrial Sourcing",
     image: gingerImg,
+    imageSrcSet: webpSrcSet("product-ginger", 576),
     imageAlt: "Dried split ginger from Nigeria",
     summary: "Split and whole dried ginger for food processing, extraction and beverages.",
     description: [
@@ -221,11 +253,13 @@ export const products: Product[] = [
   },
   {
     slug: "cocoa-beans",
+    group: "Nuts, Cocoa & Coffee",
     anchor: "cocoa",
     name: "Cocoa Beans",
     h1: "Nigerian Cocoa Beans",
     category: "Food Manufacturing",
     image: cocoaImg,
+    imageSrcSet: webpSrcSet("product-cocoa", 640),
     imageAlt: "Fermented and dried cocoa beans",
     summary: "Fermented, sun-dried cocoa beans for confectionery and cocoa processing.",
     description: [
@@ -244,11 +278,13 @@ export const products: Product[] = [
   },
   {
     slug: "pearl-millet",
+    group: "Grains & Cereals",
     anchor: "millet",
     name: "Pearl Millet",
     h1: "Nigerian Pearl Millet",
     category: "Staple Grain Supply",
     image: milletImg,
+    imageSrcSet: webpSrcSet("product-millet", 1200),
     imageAlt: "Pearl millet grain from northern Nigeria",
     summary: "Pearl millet for food manufacturers, animal feed producers and grain buyers.",
     description: [
@@ -267,11 +303,13 @@ export const products: Product[] = [
   },
   {
     slug: "sorghum",
+    group: "Grains & Cereals",
     anchor: "sorghum",
     name: "Sorghum",
     h1: "Nigerian Sorghum",
     category: "Industrial Grain Supply",
     image: sorghumImg,
+    imageSrcSet: webpSrcSet("product-sorghum", 732),
     imageAlt: "White and red sorghum grain from Nigeria",
     summary: "White and red sorghum for flour milling, animal feed and brewing.",
     description: [

@@ -57,8 +57,11 @@ export function ProductsSection() {
                 <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                   <img
                     src={product.image}
+                    srcSet={product.imageSrcSet}
+                    sizes="(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw"
                     alt={product.imageAlt}
                     loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
