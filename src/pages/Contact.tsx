@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { motion, useReducedMotion } from "framer-motion";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { GoogleReCaptchaProvider, useGoogleReCaptcha } from "react-google-recaptcha-v3";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,7 @@ const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY ?? "";
 const INQUIRY_TYPES = [
   "Product Inquiry",
   "Request a Quotation",
+  "Become a Supplier",
   "Supply Partnership",
   "Export & Logistics",
   "Other Business Opportunity",
@@ -37,9 +38,19 @@ const INQUIRY_TYPES = [
 
 const PRODUCTS = [...catalog.map((product) => product.name), "Multiple Raw Materials"];
 
+const DELIVERY_TERMS = [
+  "Not sure yet / to discuss",
+  "EXW — Ex Works",
+  "FCA — Free Carrier",
+  "FOB — Free On Board",
+  "CFR — Cost and Freight",
+  "CIF — Cost, Insurance and Freight",
+  "DAP — Delivered At Place",
+];
+
 const EMPTY_FORM = {
   name: "", email: "", company: "", phone: "", inquiryType: "", product: "",
-  quantity: "", destination: "", specifications: "", message: "",
+  quantity: "", destination: "", deliveryTerms: "", specifications: "", message: "",
 };
 
 type FormState = typeof EMPTY_FORM;
@@ -63,7 +74,8 @@ const buildEmailFallback = (data: FormState) => {
     data.inquiryType && `Inquiry type: ${data.inquiryType}`,
     data.product && `Product of interest: ${data.product}`,
     data.quantity && `Quantity: ${data.quantity}`,
-    data.destination && `Destination country: ${data.destination}`,
+    data.destination && `Destination country / port: ${data.destination}`,
+    data.deliveryTerms && `Delivery terms: ${data.deliveryTerms}`,
     data.specifications && `Specification requirements: ${data.specifications}`,
   ].filter(Boolean);
   const body = `${details.join("\n")}\n\n${data.message}`;
@@ -75,10 +87,16 @@ function QuoteForm() {
   const { executeRecaptcha } = useGoogleReCaptcha();
   const [searchParams] = useSearchParams();
   const [formData, setFormData] = useState(() => {
-    // Product pages link here with ?product=<slug> so the buyer doesn't have to pick it again.
+    // Product pages link here with ?product=<slug>, and "Become a Supplier" buttons with ?type=supplier.
     const product = getProduct(searchParams.get("product") ?? "");
-    return product ? { ...EMPTY_FORM, product: product.name, inquiryType: "Request a Quotation" } : EMPTY_FORM;
+    if (product) return { ...EMPTY_FORM, product: product.name, inquiryType: "Request a Quotation" };
+    if (searchParams.get("type") === "supplier") return { ...EMPTY_FORM, inquiryType: "Become a Supplier" };
+    return EMPTY_FORM;
   });
+  // Honeypot: hidden from people, so only bots fill it. Kept outside formData so it is never shown.
+  const [website, setWebsite] = useState("");
+  // Blocks a second submission while one is in flight (state updates are not instant on double-clicks).
+  const submittingRef = useRef(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<{ message: string; fallbackHref: string } | null>(null);
@@ -103,6 +121,7 @@ function QuoteForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     setSubmitError(null);
     if (!validate()) return;
 
@@ -117,9 +136,10 @@ function QuoteForm() {
       return;
     }
 
+    submittingRef.current = true;
     setIsSubmitting(true);
     try {
-      const { inquiryType, quantity, destination, specifications, ...rest } = sanitizeFormData(formData);
+      const { inquiryType, quantity, destination, deliveryTerms, specifications, ...rest } = sanitizeFormData(formData);
 
       let recaptchaToken = "";
       if (executeRecaptcha) {
@@ -130,10 +150,11 @@ function QuoteForm() {
       const details = [
         `Inquiry type: ${inquiryType}`,
         quantity && `Quantity: ${quantity}`,
-        destination && `Destination country: ${destination}`,
+        destination && `Destination country / port: ${destination}`,
+        deliveryTerms && `Delivery terms: ${deliveryTerms}`,
         specifications && `Specification requirements: ${specifications}`,
       ].filter(Boolean).join("\n");
-      const payload = { ...rest, message: `${details}\n\n${rest.message}`, recaptchaToken };
+      const payload = { ...rest, message: `${details}\n\n${rest.message}`, website, recaptchaToken };
 
       // functions.invoke sends the apikey and Authorization headers the Edge Function gateway expects.
       const { data: json, error: invokeError } = await supabase.functions.invoke("submit-quote", { body: payload });
@@ -163,6 +184,7 @@ function QuoteForm() {
         fallbackHref,
       });
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };
@@ -273,10 +295,25 @@ function QuoteForm() {
               placeholder="e.g. 50 MT or 2 × 20ft containers" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="destination">Destination Country</Label>
+            <Label htmlFor="destination">Destination Country / Port</Label>
             <Input id="destination" name="destination" autoComplete="country-name" value={formData.destination} onChange={handleChange}
-              placeholder="e.g. India" />
+              placeholder="e.g. Nhava Sheva, India" />
           </div>
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="deliveryTerms">Preferred Delivery Terms (Incoterms)</Label>
+          <select id="deliveryTerms" name="deliveryTerms" value={formData.deliveryTerms} onChange={handleChange} className={selectClass}>
+            <option value="">Select delivery terms (optional)</option>
+            {DELIVERY_TERMS.map((term) => <option key={term} value={term}>{term}</option>)}
+          </select>
+        </div>
+
+        {/* Honeypot field for spam bots — visually hidden and skipped by keyboard and screen readers. */}
+        <div className="absolute -left-[9999px] h-px w-px overflow-hidden" aria-hidden="true">
+          <label htmlFor="website">Website</label>
+          <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" value={website}
+            onChange={(e) => setWebsite(e.target.value)} />
         </div>
 
         <div className="space-y-1.5">
@@ -316,7 +353,13 @@ function QuoteForm() {
         )}
 
         {RECAPTCHA_SITE_KEY && (
-          <p className="text-xs text-muted-foreground">This form is protected by Google reCAPTCHA v3.</p>
+          <p className="text-xs text-muted-foreground">
+            This site is protected by reCAPTCHA and the Google{" "}
+            <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Privacy Policy</a>{" "}
+            and{" "}
+            <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" className="underline underline-offset-2">Terms of Service</a>{" "}
+            apply.
+          </p>
         )}
 
         <Button type="submit" variant="gold" size="lg" className="w-full" disabled={isSubmitting}>

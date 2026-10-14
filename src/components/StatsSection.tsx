@@ -4,8 +4,8 @@ import { Users, Globe, Award, TrendingUp } from "lucide-react";
 const stats = [
   { icon: Award, value: "22+", label: "Years Trading Experience (Since 2003)" },
   { icon: TrendingUp, value: "2015", label: "Official Company Registration" },
-  { icon: Globe, value: "Global", label: "Import & Export Operations" },
-  { icon: Users, value: "Trusted", label: "Farmers, Suppliers & Business Partners" },
+  { icon: Globe, value: "11", label: "Agricultural Commodities in Our Range" },
+  { icon: Users, value: "2", label: "Locations: Damaturu & Dawanau Market, Kano" },
 ];
 
 export function StatsSection() {

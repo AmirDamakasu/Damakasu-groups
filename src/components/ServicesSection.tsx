@@ -19,19 +19,19 @@ const services = [
   {
     icon: ClipboardCheck,
     title: "Quality Inspection",
-    description: "Comprehensive testing, grading, and compliance verification against international standards.",
+    description: "Grading, sorting and quality checks to the agreed specification, with laboratory testing arranged on request.",
     slug: "inspection",
   },
   {
     icon: FileText,
     title: "Warehousing & Inventory Management",
-    description: "Secure storage facilities and real-time stock management to support your production schedule.",
+    description: "Storage, aggregation and packing of commodities ahead of delivery or shipment.",
     slug: "packaging",
   },
   {
     icon: Ship,
     title: "Logistics & Distribution",
-    description: "Domestic and international delivery solutions with tracking, insurance, and on-time guarantees.",
+    description: "Domestic delivery and export shipment arranged with trusted transport and freight partners.",
     slug: "logistics",
   },
   {

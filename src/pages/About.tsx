@@ -9,7 +9,7 @@ const values = [
   {
     icon: Target,
     title: "Quality Excellence",
-    description: "Strict inspection and quality control procedures at every stage ensure only certified products reach our clients.",
+    description: "Grading, sorting and quality checks against the specification agreed with each buyer.",
   },
   {
     icon: CheckSquare,
@@ -28,13 +28,13 @@ const values = [
   },
   {
     icon: Globe,
-    title: "Global Reach",
-    description: "Established distribution networks and supplier relationships spanning multiple continents.",
+    title: "Market Reach",
+    description: "Connecting produce sourced in Nigeria with domestic buyers and international markets.",
   },
   {
     icon: Award,
-    title: "Compliance & Standards",
-    description: "Full compliance with international trade regulations, quality certifications, and industry standards.",
+    title: "Compliance & Documentation",
+    description: "Trade documentation prepared for every order, with inspection and testing arranged as contracts require.",
   },
 ];
 
@@ -128,9 +128,9 @@ const About = () => {
                   </p>
                   <p>
                     Our success is driven by long-term partnerships with trusted farmers, cooperatives,
-                    processors, manufacturers, and logistics partners. Every product we supply is carefully
-                    sourced and handled to meet international quality standards while ensuring timely delivery
-                    and competitive pricing.
+                    processors, manufacturers, and logistics partners. Every order is sourced and handled to the
+                    quality specification agreed with the buyer, with delivery timelines and pricing confirmed in
+                    writing.
                   </p>
                   <p>
                     As we continue to grow, we remain committed to the values that have guided us since

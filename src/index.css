@@ -175,3 +175,8 @@
     }
   }
 }
+
+/* reCAPTCHA v3 badge: hidden because the contact form shows Google's required attribution text instead. */
+.grecaptcha-badge {
+  visibility: hidden;
+}

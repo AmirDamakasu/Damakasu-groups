@@ -4,6 +4,7 @@ import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { SupplyProcess } from "@/components/SupplyProcess";
 import { Search, ClipboardCheck, Package, Ship, FileText, ArrowRight, CheckCircle, BarChart2 } from "lucide-react";
 
 const services = [
@@ -37,39 +38,39 @@ const services = [
     icon: ClipboardCheck,
     slug: "inspection",
     title: "Quality Inspection",
-    description: "Comprehensive testing, grading, and compliance verification against international standards.",
+    description: "Grading, sorting and quality checks against the specification agreed with each buyer.",
     features: [
-      "Laboratory testing and chemical analysis",
-      "Moisture content and purity verification",
-      "Contaminant and aflatoxin screening",
       "Physical grading and sorting procedures",
-      "Third-party certification and documentation",
+      "Moisture content and purity checks",
+      "Aflatoxin and contaminant testing arranged when required",
+      "Independent laboratory or third-party inspection on request",
+      "Quality documentation shared with the buyer before shipment",
     ],
   },
   {
     icon: FileText,
     slug: "packaging",
     title: "Warehousing & Inventory Management",
-    description: "Secure storage facilities and real-time inventory management to support your production operations.",
+    description: "Storage, aggregation and packing of commodities ahead of delivery or shipment.",
     features: [
-      "Climate-controlled warehousing facilities",
-      "Real-time inventory tracking and reporting",
-      "Multiple packaging options (bags, bulk, containers)",
-      "Fumigation, pest control, and quality preservation",
-      "Dedicated stock management for manufacturing clients",
+      "Aggregation of produce from farmers and suppliers",
+      "Packing in bags or bulk to the buyer's requirement",
+      "Fumigation and pest control arranged before shipment",
+      "Stock updates shared with the buyer during an order",
+      "Storage arranged around delivery schedules",
     ],
   },
   {
     icon: Ship,
     slug: "logistics",
     title: "Logistics & Distribution",
-    description: "Domestic and international delivery solutions with end-to-end tracking and on-time guarantees.",
+    description: "Domestic delivery and export shipment arranged with transport and freight partners.",
     features: [
-      "Sea freight (FCL and LCL) for large volumes",
-      "Air freight for time-critical shipments",
-      "Multi-modal transport solutions",
-      "Real-time shipment tracking systems",
-      "Insurance coverage and cargo protection",
+      "Road transport within Nigeria",
+      "Container shipment (FCL / LCL) arranged with freight forwarders",
+      "Delivery terms agreed per contract (e.g. FOB, CFR, CIF)",
+      "Shipping documents prepared for each consignment",
+      "Cargo insurance arranged where the contract requires it",
     ],
   },
   {
@@ -176,6 +177,8 @@ const Services = () => {
             </div>
           </div>
         </section>
+
+        <SupplyProcess />
 
         {/* CTA */}
         <section className="py-24 bg-earth">

@@ -7,6 +7,7 @@ import { ServicesSection } from "@/components/ServicesSection";
 import { MarketsSection } from "@/components/MarketsSection";
 import { StatsSection } from "@/components/StatsSection";
 import { CTASection } from "@/components/CTASection";
+import { SupplyProcess } from "@/components/SupplyProcess";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 
 const Index = () => {
@@ -20,6 +21,7 @@ const Index = () => {
         <AboutSection />
         <MarketsSection />
         <ServicesSection />
+        <SupplyProcess />
         <CTASection />
       </main>
       <Footer />

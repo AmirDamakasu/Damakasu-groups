@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Phone } from "lucide-react";
+import { PHONES } from "@/lib/contact";
 
 export function CTASection() {
   return (
@@ -45,22 +46,23 @@ export function CTASection() {
             transition={{ delay: 0.3 }}
             className="flex flex-col sm:flex-row items-center justify-center gap-4"
           >
-            <Link to="/contact">
-              <Button variant="gold" size="xl">
+            <Button variant="gold" size="xl" asChild>
+              <Link to="/contact#inquiry">
                 Request a Quote
                 <ArrowRight className="w-5 h-5" />
-              </Button>
-            </Link>
-            <a href="tel:+2341234567890">
-              <Button
-                variant="outline"
-                size="xl"
-                className="border-accent-foreground/30 text-accent-foreground hover:bg-accent-foreground/10"
-              >
+              </Link>
+            </Button>
+            <Button
+              variant="outline"
+              size="xl"
+              asChild
+              className="border-accent-foreground/30 text-accent-foreground hover:bg-accent-foreground/10"
+            >
+              <a href={PHONES[0].href} aria-label={`Call us now on ${PHONES[0].display}`}>
                 <Phone className="w-5 h-5" />
                 Call Us Now
-              </Button>
-            </a>
+              </a>
+            </Button>
           </motion.div>
         </div>
       </div>

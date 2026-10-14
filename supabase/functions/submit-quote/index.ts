@@ -211,6 +211,16 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json();
 
+    // 0. Honeypot: the hidden "website" field is only ever filled in by bots. Reply as if accepted
+    //    (so bots learn nothing) but store nothing.
+    if (typeof body.website === "string" && body.website.trim() !== "") {
+      await supabase.from("security_events").insert({ event_type: "honeypot", ip_address: ip, details: {} });
+      return new Response(
+        JSON.stringify({ success: true, message: "Thank you for your inquiry." }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+      );
+    }
+
     // 1. reCAPTCHA
     const captchaOk = await verifyRecaptcha(body.recaptchaToken ?? "", ip);
     if (!captchaOk) {

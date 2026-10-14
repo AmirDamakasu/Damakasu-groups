@@ -90,10 +90,10 @@ export function HeroSection() {
           className="mt-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto"
         >
           {[
-            { icon: Shield, title: "Quality Assured", desc: "Certified products meeting international standards" },
-            { icon: CheckCircle, title: "Reliable Supply Chain", desc: "Consistent sourcing and uninterrupted delivery" },
-            { icon: Globe, title: "Global Distribution", desc: "Supplying manufacturers across multiple countries" },
-            { icon: Truck, title: "Fast Logistics", desc: "On-time delivery and inventory support" },
+            { icon: Shield, title: "Quality to Specification", desc: "Grades and quality limits agreed in every contract" },
+            { icon: CheckCircle, title: "Direct Sourcing", desc: "Commodities sourced in northern Nigeria" },
+            { icon: Globe, title: "Domestic & Export Buyers", desc: "Serving buyers in Nigeria and abroad" },
+            { icon: Truck, title: "Coordinated Logistics", desc: "Packing, documents and shipment arranged per order" },
           ].map((item, index) => (
             <div
               key={item.title}
