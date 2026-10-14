@@ -58,5 +58,8 @@ Sitemap: ${ssr.SITE_URL}/sitemap.xml
 `,
 );
 
+// URL list for IndexNow submissions (scripts/indexnow.mjs) — same pages as the sitemap.
+await write("indexnow-urls.json", JSON.stringify(ssr.indexablePaths.map((url) => `${ssr.SITE_URL}${url}`), null, 2));
+
 await fs.rm(ssrDir, { recursive: true, force: true });
 console.log(`Prerendered ${pages.length} pages + 404.html; sitemap lists ${ssr.indexablePaths.length} URLs.`);
