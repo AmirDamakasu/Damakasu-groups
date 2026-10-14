@@ -1,28 +1,15 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useCallback, useState, useEffect, useMemo } from "react";
+import type { Session } from "@supabase/supabase-js";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase, type QuoteRequest } from "@/lib/supabase";
+import { supabase, isSupabaseConfigured, type QuoteRequest } from "@/lib/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  Search, Download, LogOut, RefreshCw, Mail, Phone, Building2,
-  Package, Calendar, AlertCircle, CheckCircle, Clock,
-  Shield, Eye, EyeOff, Trash2, X
+  Search, Download, LogOut, RefreshCw, Mail,
+  Package, AlertCircle, CheckCircle, Clock,
+  Shield, Eye, EyeOff, Trash2,
 } from "lucide-react";
 import * as XLSX from "xlsx";
-
-const ADMIN_API_URL = import.meta.env.VITE_SUPABASE_URL
-  ? `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/admin-api`
-  : null;
-
-const ADMIN_PASSWORD_HASH = import.meta.env.VITE_ADMIN_PASSWORD_HASH ?? "";
-
-async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
 
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-amber-100 text-amber-800 border-amber-200",
@@ -36,97 +23,39 @@ const STATUS_ICONS: Record<string, React.ElementType> = {
   closed: CheckCircle,
 };
 
+type QuoteStatus = NonNullable<QuoteRequest["status"]>;
+
 // ─── Login screen ─────────────────────────────────────────────
-function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
+// Admins sign in with a Supabase Auth account. Access to quote requests is enforced by
+// Row Level Security (public.is_admin()), not by this screen.
+function LoginScreen({ notice }: { notice?: string }) {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [attempts, setAttempts] = useState(0);
-  const [lockoutTime, setLockoutTime] = useState(0);
-
-  useEffect(() => {
-    if (lockoutTime > 0) {
-      const timer = setInterval(() => {
-        setLockoutTime((t) => (t <= 1 ? 0 : t - 1));
-      }, 1000);
-      return () => clearInterval(timer);
-    }
-  }, [lockoutTime]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (lockoutTime > 0) return;
-
-    if (!ADMIN_PASSWORD_HASH && !ADMIN_API_URL) {
-      setError("Admin authentication configuration is missing in environment variables.");
+    if (!isSupabaseConfigured) {
+      setError("Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY and rebuild.");
       return;
     }
 
     setIsSubmitting(true);
     setError("");
-
     try {
-      const hashed = await hashPassword(password);
-      let authenticated = false;
-      let sessionToken = "";
-
-      // 1. Attempt secure Edge Function auth first
-      if (ADMIN_API_URL) {
-        try {
-          const res = await fetch(ADMIN_API_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ action: "login", passwordHash: hashed }),
-          });
-
-          if (res.ok) {
-            const json = await res.json();
-            if (json.token) {
-              authenticated = true;
-              sessionToken = json.token;
-            }
-          }
-        } catch {
-          // Edge Function not deployed yet or network unavailable — proceed to fallback
-        }
+      const { error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
+      if (authError) {
+        setError(
+          authError.status === 400 || authError.status === 401
+            ? "Incorrect email or password."
+            : `Sign-in failed: ${authError.message}`,
+        );
+        setPassword("");
       }
-
-      // Default local hashes for damakasu2024, admin123, and admin
-      const DEFAULT_HASHES = [
-        "4412680192de761ab275cd417b294881357d49c8e1e81183e32b896bbf4c2f50", // damakasu2024
-        "240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9", // admin123
-        "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918", // admin
-      ];
-
-      // 2. Fallback to local hash verification if Edge Function isn't reachable
-      if (!authenticated) {
-        if (ADMIN_PASSWORD_HASH && hashed === ADMIN_PASSWORD_HASH) {
-          authenticated = true;
-        } else if (DEFAULT_HASHES.includes(hashed)) {
-          authenticated = true;
-        }
-        if (authenticated) {
-          sessionToken = `local-session-${Date.now()}`;
-        }
-      }
-
-      if (authenticated) {
-        onLogin(sessionToken);
-        return;
-      }
-
-      const nextAttempts = attempts + 1;
-      setAttempts(nextAttempts);
-      if (nextAttempts >= 5) {
-        setLockoutTime(60); // 60 seconds lockout
-        setError("Too many failed login attempts. Locked for 60 seconds.");
-      } else {
-        setError(`Incorrect password. (${5 - nextAttempts} attempts remaining)`);
-      }
-      setPassword("");
     } catch {
-      setError("Authentication process error. Please try again.");
+      setError("Could not reach the authentication server. Check your connection and try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -144,40 +73,53 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
             <Shield className="w-7 h-7 text-secondary-foreground" />
           </div>
           <h1 className="font-serif text-2xl font-bold text-foreground">Admin Dashboard</h1>
-          <p className="text-muted-foreground text-sm mt-1">DAMAKASU MULTI-LINK INVESTIMENT LTD</p>
+          <p className="text-muted-foreground text-sm mt-1">Damakasu Multi-Link Investment Ltd</p>
         </div>
 
+        {notice && (
+          <p className="mb-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">{notice}</p>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-5">
+          <Input
+            type="email"
+            autoComplete="username"
+            placeholder="Admin email"
+            aria-label="Admin email"
+            value={email}
+            disabled={isSubmitting}
+            onChange={(e) => { setEmail(e.target.value); setError(""); }}
+            autoFocus
+            required
+          />
           <div className="relative">
             <Input
               type={showPass ? "text" : "password"}
-              placeholder="Enter admin password"
+              autoComplete="current-password"
+              placeholder="Password"
+              aria-label="Password"
               value={password}
-              disabled={lockoutTime > 0 || isSubmitting}
+              disabled={isSubmitting}
               onChange={(e) => { setPassword(e.target.value); setError(""); }}
               className="pr-10"
-              autoFocus
+              required
             />
             <button
               type="button"
               onClick={() => setShowPass((v) => !v)}
+              aria-label={showPass ? "Hide password" : "Show password"}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
               {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
             </button>
           </div>
           {error && (
-            <p className="text-red-600 text-sm flex items-center gap-1">
+            <p role="alert" className="text-red-600 text-sm flex items-center gap-1">
               <AlertCircle className="w-4 h-4 shrink-0" /> {error}
             </p>
           )}
-          {lockoutTime > 0 && (
-            <p className="text-amber-600 text-xs text-center font-medium">
-              Please wait {lockoutTime}s before trying again.
-            </p>
-          )}
-          <Button type="submit" variant="default" size="lg" className="w-full" disabled={lockoutTime > 0 || isSubmitting}>
-            {isSubmitting ? "Authenticating..." : "Sign In"}
+          <Button type="submit" variant="default" size="lg" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? "Signing in..." : "Sign In"}
           </Button>
         </form>
       </motion.div>
@@ -186,7 +128,7 @@ function LoginScreen({ onLogin }: { onLogin: (token: string) => void }) {
 }
 
 // ─── Main dashboard ───────────────────────────────────────────
-function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
+function Dashboard({ onLogout }: { onLogout: () => void }) {
   const [quotes, setQuotes] = useState<QuoteRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -196,106 +138,44 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
   const [error, setError] = useState("");
   const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
-  const fetchQuotes = async () => {
+  const fetchQuotes = useCallback(async () => {
     setLoading(true);
     setError("");
-    try {
-      let fetched = false;
-      if (ADMIN_API_URL) {
-        try {
-          const res = await fetch(ADMIN_API_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-admin-token": token,
-            },
-            body: JSON.stringify({ action: "list_quotes" }),
-          });
-          if (res.ok) {
-            const json = await res.json();
-            setQuotes(json.data ?? []);
-            fetched = true;
-          }
-        } catch {
-          // Edge Function unreachable
-        }
-      }
-
-      if (!fetched) {
-        const { data, error: err } = await supabase
-          .from("quote_requests")
-          .select("*")
-          .order("created_at", { ascending: false });
-
-        if (err) throw err;
-        setQuotes(data ?? []);
-      }
-    } catch {
-      setError("Failed to load quote requests. Check your database connection.");
-    } finally {
-      setLoading(false);
+    const { data, error: err } = await supabase
+      .from("quote_requests")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (err) {
+      setError(`Failed to load quote requests: ${err.message}`);
+    } else {
+      setQuotes(data ?? []);
     }
-  };
+    setLoading(false);
+  }, []);
 
-  useEffect(() => { fetchQuotes(); }, []);
+  useEffect(() => { fetchQuotes(); }, [fetchQuotes]);
 
-  const updateStatus = async (id: string, status: string) => {
-    try {
-      let updated = false;
-      if (ADMIN_API_URL) {
-        try {
-          const res = await fetch(ADMIN_API_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-admin-token": token,
-            },
-            body: JSON.stringify({ action: "update_status", id, status }),
-          });
-          if (res.ok) updated = true;
-        } catch {
-          // Edge Function unreachable
-        }
-      }
-
-      if (!updated) {
-        await supabase.from("quote_requests").update({ status }).eq("id", id);
-      }
-      setQuotes((prev) => prev.map((q) => (q.id === id ? { ...q, status: status as any } : q)));
-    } catch {
-      setError("Failed to update status.");
+  const updateStatus = async (id: string, status: QuoteStatus) => {
+    setError("");
+    // .select() returns the updated row, so a silent RLS refusal (zero rows) is detected.
+    const { data, error: err } = await supabase.from("quote_requests").update({ status }).eq("id", id).select("id");
+    if (err || !data?.length) {
+      setError(`Failed to update status${err ? `: ${err.message}` : " — the record was not changed."}`);
+      return;
     }
+    setQuotes((prev) => prev.map((q) => (q.id === id ? { ...q, status } : q)));
   };
 
   const confirmDeleteQuote = async () => {
     if (!deleteTargetId) return;
-    try {
-      let deleted = false;
-      if (ADMIN_API_URL) {
-        try {
-          const res = await fetch(ADMIN_API_URL, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "x-admin-token": token,
-            },
-            body: JSON.stringify({ action: "delete_quote", id: deleteTargetId }),
-          });
-          if (res.ok) deleted = true;
-        } catch {
-          // Edge Function unreachable
-        }
-      }
-
-      if (!deleted) {
-        await supabase.from("quote_requests").delete().eq("id", deleteTargetId);
-      }
+    setError("");
+    const { data, error: err } = await supabase.from("quote_requests").delete().eq("id", deleteTargetId).select("id");
+    if (err || !data?.length) {
+      setError(`Failed to delete quote${err ? `: ${err.message}` : " — the record was not deleted."}`);
+    } else {
       setQuotes((prev) => prev.filter((q) => q.id !== deleteTargetId));
-    } catch {
-      setError("Failed to delete quote.");
-    } finally {
-      setDeleteTargetId(null);
     }
+    setDeleteTargetId(null);
   };
 
   const filtered = useMemo(() => {
@@ -311,9 +191,9 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
           (q.product ?? "").toLowerCase().includes(s)
       );
     }
-    data.sort((a: any, b: any) => {
-      const va = a[sortField] ?? "";
-      const vb = b[sortField] ?? "";
+    data.sort((a, b) => {
+      const va = String(a[sortField] ?? "");
+      const vb = String(b[sortField] ?? "");
       return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
     });
     return data;
@@ -356,7 +236,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
         <div className="container mx-auto px-4 lg:px-8 py-4 flex items-center justify-between">
           <div>
             <h1 className="font-serif text-xl font-bold">Quote Requests Dashboard</h1>
-            <p className="text-primary-foreground/70 text-xs mt-0.5">DAMAKASU MULTI-LINK INVESTIMENT LTD</p>
+            <p className="text-primary-foreground/70 text-xs mt-0.5">Damakasu Multi-Link Investment Ltd</p>
           </div>
           <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" onClick={fetchQuotes} className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
@@ -457,7 +337,7 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
                       <td className="px-4 py-3">
                         <select
                           value={q.status ?? "pending"}
-                          onChange={(e) => updateStatus(q.id!, e.target.value)}
+                          onChange={(e) => updateStatus(q.id!, e.target.value as QuoteStatus)}
                           className={`text-xs font-semibold px-2.5 py-1 rounded-full border outline-none ${STATUS_STYLES[q.status ?? "pending"]}`}
                         >
                           <option value="pending">Pending</option>
@@ -501,16 +381,47 @@ function Dashboard({ token, onLogout }: { token: string; onLogout: () => void })
   );
 }
 
+type AdminState = "loading" | "signed-out" | "not-admin" | "admin";
+
 export default function Admin() {
-  const [token, setToken] = useState<string | null>(null);
+  const [state, setState] = useState<AdminState>("loading");
+  const [notice, setNotice] = useState<string>();
 
-  const login = (sessionToken: string) => {
-    setToken(sessionToken);
-  };
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setState("signed-out");
+      return;
+    }
 
-  const logout = () => {
-    setToken(null);
-  };
+    let cancelled = false;
+    const resolve = async (session: Session | null) => {
+      if (!session) {
+        if (!cancelled) setState("signed-out");
+        return;
+      }
+      const { data: isAdmin, error } = await supabase.rpc("is_admin");
+      if (cancelled) return;
+      if (error || !isAdmin) {
+        setNotice(error ? `Could not verify admin access: ${error.message}` : "This account does not have admin access.");
+        setState("not-admin");
+        await supabase.auth.signOut();
+        return;
+      }
+      setNotice(undefined);
+      setState("admin");
+    };
 
-  return token ? <Dashboard token={token} onLogout={logout} /> : <LoginScreen onLogin={login} />;
+    supabase.auth.getSession().then(({ data }) => resolve(data.session));
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT") resolve(session);
+    });
+    return () => {
+      cancelled = true;
+      listener.subscription.unsubscribe();
+    };
+  }, []);
+
+  if (state === "loading") return <div className="min-h-screen bg-background" />;
+  if (state === "admin") return <Dashboard onLogout={() => supabase.auth.signOut()} />;
+  return <LoginScreen notice={notice} />;
 }

@@ -3,8 +3,10 @@
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const COMPANY_EMAIL = Deno.env.get("COMPANY_EMAIL") ?? "damakasumultilinkinvestmentlimited@gmail.com";
+const COMPANY_EMAIL = Deno.env.get("COMPANY_EMAIL") ?? "info@damakasu.com";
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
+// Must be an address on a domain verified in Resend.
+const RESEND_FROM = Deno.env.get("RESEND_FROM") ?? "Damakasu Multi-Link <noreply@damakasu.com>";
 const RECAPTCHA_SECRET = Deno.env.get("RECAPTCHA_SECRET_KEY") ?? "";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SUPABASE_SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
@@ -13,13 +15,21 @@ const RATE_LIMIT = 5; // max submissions per IP per hour
 const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
 // ─── Allowed origins for CORS ────────────────────────────────────
-const ALLOWED_ORIGINS = [
-  "https://damakasu-groups.vercel.app",
-  "http://localhost:8080",
-  "http://127.0.0.1:8080",
-];
+// Override with the ALLOWED_ORIGINS secret (comma-separated) when the site moves.
+const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ??
+  [
+    "https://damakasu.com",
+    "https://www.damakasu.com",
+    "https://mistyrose-echidna-938984.hostingersite.com",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+  ].join(","))
+  .split(",")
+  .map((o) => o.trim())
+  .filter(Boolean);
 
 function getCorsHeaders(requestOrigin: string | null) {
+  // Unlisted origins get the primary origin back, so browsers block their requests.
   const origin = requestOrigin && ALLOWED_ORIGINS.includes(requestOrigin)
     ? requestOrigin
     : ALLOWED_ORIGINS[0];
@@ -32,17 +42,22 @@ function getCorsHeaders(requestOrigin: string | null) {
   };
 }
 
-// ─── Sanitize: strip HTML tags ─────────────────────────────────
-function sanitize(input: unknown): string {
+// ─── Input cleaning ────────────────────────────────────────────
+// Stored as plain text (control characters removed, length capped); HTML-escaped only when
+// placed into email markup, so the database keeps exactly what the visitor typed.
+function clean(input: unknown, maxLength: number): string {
   if (typeof input !== "string") return "";
-  return input
+  // deno-lint-ignore no-control-regex
+  return input.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim().slice(0, maxLength);
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
-    .replace(/&/g, "&amp;")
     .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#x27;")
-    .trim()
-    .slice(0, 5000);
+    .replace(/'/g, "&#x27;");
 }
 
 // ─── Validate email ────────────────────────────────────────────
@@ -63,7 +78,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      from: "DAMAKASU MULTI-LINK <noreply@damakasusupply.com>",
+      from: RESEND_FROM,
       to: [to],
       subject,
       html,
@@ -105,21 +120,21 @@ async function verifyRecaptcha(token: string, ip: string): Promise<boolean> {
   if (!RECAPTCHA_SECRET) return true; // skip if not configured
   const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: `secret=${RECAPTCHA_SECRET}&response=${token}&remoteip=${ip}`,
+    body: new URLSearchParams({ secret: RECAPTCHA_SECRET, response: token, remoteip: ip }),
   });
   const json = await res.json();
   return json.success && json.score >= 0.5;
 }
 
 // ─── Company email HTML ────────────────────────────────────────
-function companyEmailHtml(data: Record<string, string>) {
+function companyEmailHtml(raw: Record<string, string>) {
+  const data = Object.fromEntries(Object.entries(raw).map(([k, v]) => [k, escapeHtml(v)]));
   const dt = new Date().toLocaleString("en-GB", { timeZone: "Africa/Lagos" });
   return `
 <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
   <div style="background:#0F172A;padding:24px;text-align:center">
     <h2 style="color:#fff;margin:0;font-size:20px">New Quote Request</h2>
-    <p style="color:#94a3b8;margin:4px 0 0">DAMAKASU MULTI-LINK INVESTIMENT LTD</p>
+    <p style="color:#94a3b8;margin:4px 0 0">Damakasu Multi-Link Investment Ltd</p>
   </div>
   <div style="padding:32px">
     <table style="width:100%;border-collapse:collapse">
@@ -132,7 +147,7 @@ function companyEmailHtml(data: Record<string, string>) {
     </table>
     <div style="margin-top:24px;background:#f8fafc;border-left:4px solid #2563EB;padding:16px;border-radius:4px">
       <p style="font-weight:bold;margin:0 0 8px;color:#0F172A">Message:</p>
-      <p style="margin:0;color:#334155;line-height:1.6">${data.message}</p>
+      <p style="margin:0;color:#334155;line-height:1.6;white-space:pre-line">${data.message}</p>
     </div>
     <div style="margin-top:24px;text-align:center">
       <a href="mailto:${data.email}?subject=Re: Your Quote Request" style="background:#2563EB;color:#fff;padding:12px 24px;border-radius:6px;text-decoration:none;font-weight:bold">Reply to Customer</a>
@@ -149,17 +164,18 @@ function row(label: string, value: string) {
 }
 
 // ─── Customer confirmation email HTML ──────────────────────────
-function customerEmailHtml(name: string) {
+function customerEmailHtml(rawName: string) {
+  const name = escapeHtml(rawName);
   return `
 <div style="font-family:Arial,sans-serif;max-width:640px;margin:auto;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden">
   <div style="background:#0F172A;padding:24px;text-align:center">
     <h2 style="color:#fff;margin:0;font-size:20px">Quote Request Received</h2>
-    <p style="color:#94a3b8;margin:4px 0 0">DAMAKASU MULTI-LINK INVESTIMENT LTD</p>
+    <p style="color:#94a3b8;margin:4px 0 0">Damakasu Multi-Link Investment Ltd</p>
   </div>
   <div style="padding:32px">
     <p style="color:#334155;font-size:16px">Dear <strong>${name}</strong>,</p>
     <p style="color:#334155;line-height:1.7">
-      Thank you for contacting <strong>Damakasu Multi-Link Investiment Ltd.</strong>
+      Thank you for contacting <strong>Damakasu Multi-Link Investment Ltd.</strong>
       We have received your quotation request and our sales team will respond shortly.
     </p>
     <p style="color:#334155;line-height:1.7">
@@ -173,7 +189,7 @@ function customerEmailHtml(name: string) {
         💬 <a href="https://wa.me/2349160595507" style="color:#166534;">Chat on WhatsApp</a>
       </p>
     </div>
-    <p style="color:#64748b;font-size:14px">Best regards,<br/><strong>DAMAKASU MULTI-LINK INVESTIMENT LTD</strong><br/>Sales & Procurement Team</p>
+    <p style="color:#64748b;font-size:14px">Best regards,<br/><strong>Damakasu Multi-Link Investment Ltd</strong><br/>Sales & Procurement Team</p>
   </div>
   <div style="background:#f1f5f9;padding:16px;text-align:center">
     <p style="color:#94a3b8;font-size:12px;margin:0">Damaturu LGA, Nigeria &nbsp;|&nbsp; Kano Dawanau Market, Damakasu Street</p>
@@ -232,17 +248,17 @@ Deno.serve(async (req) => {
 
     // 3. Sanitize
     const data = {
-      name: sanitize(body.name),
-      email: sanitize(body.email),
-      phone: sanitize(body.phone ?? ""),
-      company: sanitize(body.company ?? ""),
-      product: sanitize(body.product ?? ""),
-      message: sanitize(body.message),
+      name: clean(body.name, 200),
+      email: clean(body.email, 254),
+      phone: clean(body.phone ?? "", 40),
+      company: clean(body.company ?? "", 200),
+      product: clean(body.product ?? "", 200),
+      message: clean(body.message, 6000),
     };
 
-    // 4. Server-side validation
-    if (!data.name || data.name.length < 2) {
-      return new Response(JSON.stringify({ error: "Valid name is required." }), {
+    // 4. Server-side validation (mirrors the database CHECK constraints)
+    if (data.name.length < 2 || data.name.length > 100) {
+      return new Response(JSON.stringify({ error: "Name must be between 2 and 100 characters." }), {
         status: 422,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
@@ -253,8 +269,8 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-    if (!data.message || data.message.length < 10) {
-      return new Response(JSON.stringify({ error: "Message must be at least 10 characters." }), {
+    if (data.message.length < 10 || data.message.length > 5000) {
+      return new Response(JSON.stringify({ error: "Message must be between 10 and 5000 characters." }), {
         status: 422,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

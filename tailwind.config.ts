@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import tailwindcssAnimate from "tailwindcss-animate";
 
 export default {
   darkMode: ["class"],
@@ -92,6 +93,11 @@ export default {
         "gradient-earth": "var(--gradient-earth)",
       },
       keyframes: {
+        // Very slow glow for the leadership card's accent bar (About page).
+        "accent-breathe": {
+          "0%, 100%": { boxShadow: "0 0 0 0 rgba(4, 120, 87, 0)" },
+          "50%": { boxShadow: "0 0 14px 1px rgba(4, 120, 87, 0.35)" },
+        },
         "accordion-down": {
           from: { height: "0" },
           to: { height: "var(--radix-accordion-content-height)" },
@@ -110,6 +116,7 @@ export default {
         },
       },
       animation: {
+        "accent-breathe": "accent-breathe 12s ease-in-out infinite",
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
@@ -117,5 +124,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [tailwindcssAnimate],
 } satisfies Config;

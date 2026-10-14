@@ -1,31 +1,26 @@
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin } from "lucide-react";
-import damakasuLogo from "/damakasu.png";
+import damakasuLogo from "/logo-160.png";
+import {
+  COMPANY_NAME, LOCATIONS, PHONES, PRIMARY_EMAIL, PRIMARY_EMAIL_HREF,
+  SECONDARY_EMAIL, SECONDARY_EMAIL_HREF, WHATSAPP_LINK,
+} from "@/lib/contact";
+import { products as catalog, productPath } from "@/data/products";
 
-const WHATSAPP_LINK =
-  "https://wa.me/2349160595507?text=Hello%20Damakasu%20Multi-Link%20Investiment%20Ltd.%20I%20would%20like%20to%20request%20a%20quotation.";
 const LINKEDIN_LINK = "https://www.linkedin.com/in/muhammad-hassandamakasu-58079040b/";
-const EMAIL = "damakasumultilinkinvestimentlimited@gmail.com";
 
 const quickLinks = [
   { name: "About Us", href: "/about" },
   { name: "Products", href: "/products" },
   { name: "Services", href: "/services" },
+  { name: "Markets", href: "/markets" },
   { name: "Contact", href: "/contact" },
 ];
 
-const products = [
-  { name: "Sesame Seeds", href: "/products#sesame" },
-  { name: "Cashew Nuts", href: "/products#cashew" },
-  { name: "Soybeans", href: "/products#soybeans" },
-  { name: "Industrial Grade Rice", href: "/products#rice" },
-  { name: "Yellow Maize", href: "/products#maize" },
-  { name: "Hibiscus Flower", href: "/products#hibiscus" },
-  { name: "Pearl Millet", href: "/products#millet" },
-  { name: "Sorghum", href: "/products#sorghum" },
-];
-
-const COMPANY_NAME = "DAMAKASU MULTI-LINK INVESTIMENT LTD";
+const footerProductSlugs = ["sesame-seeds", "cashew-nuts", "soybeans", "rice", "yellow-maize", "dried-hibiscus", "pearl-millet", "sorghum"];
+const products = catalog
+  .filter((product) => footerProductSlugs.includes(product.slug))
+  .map((product) => ({ name: product.name, href: productPath(product) }));
 
 export function Footer() {
   return (
@@ -82,7 +77,7 @@ export function Footer() {
 
               {/* Email */}
               <a
-                href={`mailto:${EMAIL}?subject=Product%20Inquiry&body=Hello%20Damakasu%20Multi-Link%20Investiment%20Ltd.%0A%0AI%20would%20like%20to%20inquire%20about%20your%20products%20and%20request%20a%20quotation.%0A%0AThank%20you.`}
+                href={PRIMARY_EMAIL_HREF}
                 aria-label="Email us"
                 className="w-9 h-9 rounded-full bg-secondary hover:bg-secondary/80 flex items-center justify-center transition-all duration-200 hover:scale-110 hover:shadow-md"
                 title="Send us an email"
@@ -127,58 +122,75 @@ export function Footer() {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="min-w-0">
             <h4 className="font-serif text-lg font-semibold mb-6">Contact Us</h4>
             <ul className="space-y-4">
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                <span className="text-primary-foreground/80 text-sm">
-                  Damakasu Multilink Investiment L.T.D<br />Damaturu LGA, Nigeria
-                </span>
-              </li>
-              <li className="flex items-start gap-3">
-                <MapPin className="w-5 h-5 text-secondary shrink-0 mt-0.5" />
-                <span className="text-primary-foreground/80 text-sm">
-                  Kano Dawanau Market<br />Damakasu Street, Kano
-                </span>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-secondary shrink-0" />
-                <a href="tel:+2349037844338" className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm">
-                  +234 903 784 4338
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Phone className="w-5 h-5 text-secondary shrink-0" />
-                <a href="tel:+234903598893" className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm">
-                  +234 903 598 893
-                </a>
-              </li>
-              <li className="flex items-center gap-3">
-                <Mail className="w-5 h-5 text-secondary shrink-0" />
-                <a
-                  href={`mailto:${EMAIL}?subject=Product%20Inquiry&body=Hello%20Damakasu%20Multi-Link%20Investiment%20Ltd.%0A%0AI%20would%20like%20to%20inquire%20about%20your%20products.%0A%0AThank%20you.`}
-                  className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm break-all"
-                >
-                  damakasumultilinkinvestimentlimited@gmail.com
-                </a>
-              </li>
+              {LOCATIONS.map((location) => (
+                <li key={location.title} className="flex items-start gap-3">
+                  <MapPin className="w-5 h-5 text-secondary shrink-0 mt-0.5" aria-hidden="true" />
+                  <a
+                    href={location.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary-foreground/80 hover:text-secondary transition-colors text-sm"
+                  >
+                    <span className="block font-semibold text-primary-foreground">{location.title}</span>
+                    {location.lines.join(", ")}
+                    <span className="mt-0.5 block text-xs text-secondary">View on Google Maps →</span>
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </a>
+                </li>
+              ))}
+              {PHONES.map((phone) => (
+                <li key={phone.href} className="flex items-center gap-3">
+                  <Phone className="w-5 h-5 text-secondary shrink-0" aria-hidden="true" />
+                  <a href={phone.href} aria-label={`Call ${phone.display}`} className="inline-flex min-h-10 items-center text-primary-foreground/80 hover:text-secondary transition-colors text-sm">
+                    {phone.display}
+                  </a>
+                </li>
+              ))}
+              {[
+                { href: PRIMARY_EMAIL_HREF, address: PRIMARY_EMAIL, primary: true },
+                { href: SECONDARY_EMAIL_HREF, address: SECONDARY_EMAIL, primary: false },
+              ].map((email) => (
+                <li key={email.address} className="flex items-center gap-3">
+                  <Mail className="w-5 h-5 text-secondary shrink-0" aria-hidden="true" />
+                  <a
+                    href={email.href}
+                    aria-label={`Email ${email.address}`}
+                    className={`inline-flex min-h-10 min-w-0 items-center text-sm underline-offset-4 hover:underline hover:text-secondary transition-colors ${
+                      email.primary ? "font-semibold text-primary-foreground" : "text-primary-foreground/80"
+                    }`}
+                  >
+                    {/* Long addresses wrap after the "@" first, and mid-address only if still too wide. */}
+                    <span className="min-w-0 [overflow-wrap:anywhere]">
+                      {email.address.split("@")[0]}@<wbr />{email.address.split("@")[1]}
+                    </span>
+                  </a>
+                </li>
+              ))}
             </ul>
+            <a
+              href={PHONES[0].href}
+              className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-lg bg-secondary px-5 text-sm font-semibold text-secondary-foreground shadow-gold transition-all hover:-translate-y-0.5 hover:bg-secondary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-foreground"
+            >
+              <Phone className="h-4 w-4" aria-hidden="true" /> Call Us
+            </a>
           </div>
         </div>
 
         {/* Bottom */}
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-primary-foreground/60 text-sm">
-            © {new Date().getFullYear()} DAMAKASU MULTI-LINK INVESTIMENT LTD. All rights reserved.
+            © {new Date().getFullYear()} {COMPANY_NAME}. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <a href="#" className="text-primary-foreground/60 hover:text-secondary transition-colors text-sm">
+            <Link to="/privacy-policy" className="text-primary-foreground/60 hover:text-secondary transition-colors text-sm">
               Privacy Policy
-            </a>
-            <a href="#" className="text-primary-foreground/60 hover:text-secondary transition-colors text-sm">
+            </Link>
+            <Link to="/terms-of-service" className="text-primary-foreground/60 hover:text-secondary transition-colors text-sm">
               Terms of Service
-            </a>
+            </Link>
           </div>
         </div>
       </div>

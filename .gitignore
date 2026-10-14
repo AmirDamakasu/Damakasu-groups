@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+hostinger-upload.zip
 *.local
 
 # Editor directories and files
@@ -31,3 +32,4 @@ dist-ssr
 
 # Supabase temp / generated files
 supabase/.temp/
+assets-originals

@@ -2,97 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
 
-import sesameImg from "@/assets/product-sesame.jpg";
-import cashewImg from "@/assets/product-cashew.jpg";
-import soybeanImg from "@/assets/product-soybean.jpg";
-import riceImg from "@/assets/product-rice.jpg";
-import maizeImg from "@/assets/product-maize.jpg";
-import hibiscusImg from "@/assets/product-hibiscus.jpg";
-import coffeeImg from "@/assets/product-coffee.jpg";
-import gingerImg from "@/assets/product-ginger.jpg";
-import cocoaImg from "@/assets/product-cocoa.jpg";
-import milletImg from "@/assets/product-millet.jpg";
-import sorghumImg from "@/assets/product-sorghum.jpg";
-
-const products = [
-  {
-    name: "Sesame Seeds",
-    description: "Premium export-quality sesame seeds for food manufacturing, oil extraction, and industrial processing.",
-    image: sesameImg,
-    category: "Food Manufacturing",
-    slug: "sesame",
-  },
-  {
-    name: "Cashew Nuts",
-    description: "High-grade raw cashew nuts supplied to food manufacturers, processors, and international buyers.",
-    image: cashewImg,
-    category: "Export Quality",
-    slug: "cashew",
-  },
-  {
-    name: "Soybeans",
-    description: "Protein-rich soybeans for animal feed production, food processing, and industrial applications.",
-    image: soybeanImg,
-    category: "Industrial Supply",
-    slug: "soybeans",
-  },
-  {
-    name: "Industrial Grade Rice",
-    description: "Bulk rice supply for food processing and manufacturing industries.",
-    image: riceImg,
-    category: "Food Processing",
-    slug: "rice",
-  },
-  {
-    name: "Yellow Maize",
-    description: "Quality maize for feed mills, food production, and industrial processing.",
-    image: maizeImg,
-    category: "Industrial Processing",
-    slug: "maize",
-  },
-  {
-    name: "Hibiscus Flower",
-    description: "Premium dried hibiscus flowers for beverage production, herbal processing, and export markets.",
-    image: hibiscusImg,
-    category: "Export Product",
-    slug: "hibiscus",
-  },
-  {
-    name: "Coffee Beans",
-    description: "Premium grade coffee beans sourced for food processors, roasters, and international distributors.",
-    image: coffeeImg,
-    category: "Premium Import",
-    slug: "coffee",
-  },
-  {
-    name: "Ginger",
-    description: "Dried and split ginger roots for food processing, extraction, and beverage manufacturing.",
-    image: gingerImg,
-    category: "Industrial Sourcing",
-    slug: "ginger",
-  },
-  {
-    name: "Cocoa Beans",
-    description: "Premium fermented cocoa beans for confectionery production and cocoa butter processing.",
-    image: cocoaImg,
-    category: "Food Manufacturing",
-    slug: "cocoa",
-  },
-  {
-    name: "Pearl Millet",
-    description: "Premium pearl millet sourced from Nigeria's northern growing regions for food manufacturers, animal feed producers, and export markets.",
-    image: milletImg,
-    category: "Staple Grain Supply",
-    slug: "millet",
-  },
-  {
-    name: "Sorghum",
-    description: "High-quality sorghum grain for flour milling, animal feed production, brewing industries, and export.",
-    image: sorghumImg,
-    category: "Industrial Grain Supply",
-    slug: "sorghum",
-  },
-];
+import { products, productPath } from "@/data/products";
 
 export function ProductsSection() {
   return (
@@ -140,14 +50,15 @@ export function ProductsSection() {
               className="h-full"
             >
               <Link
-                to={`/products#${product.slug}`}
+                to={productPath(product)}
                 className="group flex flex-col h-full bg-card rounded-2xl overflow-hidden shadow-soft hover:shadow-medium border border-border/40 hover:border-secondary/20 hover:-translate-y-1.5 transition-all duration-300"
               >
                 {/* Image container with aspect ratio and overlay */}
                 <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                   <img
                     src={product.image}
-                    alt={product.name}
+                    alt={product.imageAlt}
+                    loading="lazy"
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                   <div className="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
@@ -167,7 +78,7 @@ export function ProductsSection() {
                     <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-secondary group-hover:translate-x-1 shrink-0 transition-all duration-300 mt-1" />
                   </div>
                   <p className="text-muted-foreground text-sm leading-relaxed mb-4 flex-grow">
-                    {product.description}
+                    {product.summary}
                   </p>
                   <div className="mt-auto">
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-secondary bg-secondary/10 px-3 py-1.5 rounded-full">

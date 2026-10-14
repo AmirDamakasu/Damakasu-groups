@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Globe, Shield, Truck, CheckCircle } from "lucide-react";
-import heroImage from "@/assets/hero-farm.jpg";
+import heroImage from "@/assets/hero-farm.webp";
 
 export function HeroSection() {
   return (
@@ -11,7 +11,8 @@ export function HeroSection() {
       <div className="absolute inset-0">
         <img
           src={heroImage}
-          alt="Industrial warehouse and supply chain operations"
+          alt=""
+          {...{ fetchpriority: "high" }}
           className="w-full h-full object-cover"
           style={{ filter: "brightness(1.1) contrast(1.05)" }}
         />
@@ -45,9 +46,9 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.1 }}
             className="font-serif text-4xl md:text-5xl lg:text-7xl font-bold text-primary-foreground leading-tight mb-6"
           >
-            Reliable Raw Material Supply
+            Nigerian Agricultural Commodity
             <br />
-            <span className="text-secondary">for Manufacturing Industries</span>
+            <span className="text-secondary">Sourcing and Supply</span>
           </motion.h1>
 
           <motion.p
@@ -56,9 +57,9 @@ export function HeroSection() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="text-lg md:text-xl text-primary-foreground/80 max-w-2xl mx-auto mb-10 leading-relaxed"
           >
-            We provide manufacturers with high-quality raw materials, bulk commodities, and procurement solutions. 
-            Our reliable supply chain, quality assurance processes, and efficient logistics ensure uninterrupted 
-            production for your business.
+            Damakasu Multi-Link Investment Ltd sources sesame seeds, soybeans, sorghum, ginger, dried hibiscus
+            and other agricultural commodities in Nigeria for processors, manufacturers and international buyers —
+            with specifications, quality checks and logistics agreed for every order.
           </motion.p>
 
           <motion.div

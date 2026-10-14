@@ -1,23 +1,13 @@
 import { Link, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import damakasuLogo from "/damakasu.png";
+import damakasuLogo from "/logo-160.png";
+import { products as catalog, productPath } from "@/data/products";
+import { PHONES } from "@/lib/contact";
 
-const products = [
-  { name: "Sesame Seeds", href: "/products#sesame" },
-  { name: "Cashew Nuts", href: "/products#cashew" },
-  { name: "Soybeans", href: "/products#soybeans" },
-  { name: "Industrial Grade Rice", href: "/products#rice" },
-  { name: "Yellow Maize", href: "/products#maize" },
-  { name: "Hibiscus Flower", href: "/products#hibiscus" },
-  { name: "Coffee Beans", href: "/products#coffee" },
-  { name: "Ginger", href: "/products#ginger" },
-  { name: "Cocoa Beans", href: "/products#cocoa" },
-  { name: "Pearl Millet", href: "/products#millet" },
-  { name: "Sorghum", href: "/products#sorghum" },
-];
+const products = catalog.map((product) => ({ name: product.name, href: productPath(product) }));
 
 const services = [
   { name: "Bulk Raw Material Supply", href: "/services#sourcing" },
@@ -33,6 +23,7 @@ const navLinks = [
   { name: "About Us", href: "/about" },
   { name: "Products", href: "/products", dropdown: products },
   { name: "Services", href: "/services", dropdown: services },
+  { name: "Markets", href: "/markets" },
   { name: "Contact", href: "/contact" },
 ];
 
@@ -46,7 +37,7 @@ export function Navbar() {
       <nav className="container mx-auto px-4 lg:px-8">
         <div className="flex items-center justify-between h-20">
           {/* Logo */}
-          <Link to="/" className="flex items-center gap-3 group">
+          <Link to="/" className="flex shrink-0 items-center gap-3 group">
             <img
               src={damakasuLogo}
               alt="Damakasu Multi-Link Investment Ltd Logo"
@@ -55,12 +46,12 @@ export function Navbar() {
             />
             <div className="flex flex-col">
               <span className="font-serif text-base font-bold leading-tight text-foreground tracking-wide">DAMAKASU</span>
-              <span className="text-[10px] text-muted-foreground -mt-0.5 tracking-widest uppercase font-medium">MULTI-LINK INVESTMENT LTD</span>
+              <span className="whitespace-nowrap text-[10px] text-muted-foreground -mt-0.5 tracking-widest uppercase font-medium">MULTI-LINK INVESTMENT LTD</span>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center gap-1">
+          <div className="hidden lg:flex items-center gap-0 xl:gap-1">
             {navLinks.map((link) => (
               <div
                 key={link.name}
@@ -70,7 +61,7 @@ export function Navbar() {
               >
                 <Link
                   to={link.href}
-                  className={`px-4 py-2 text-sm font-medium transition-colors flex items-center gap-1 rounded-lg hover:bg-muted ${
+                  className={`whitespace-nowrap px-2 xl:px-4 py-2 text-sm font-medium transition-colors flex items-center gap-1 rounded-lg hover:bg-muted ${
                     location.pathname === link.href
                       ? "text-primary"
                       : "text-muted-foreground hover:text-foreground"
@@ -108,13 +99,17 @@ export function Navbar() {
             ))}
           </div>
 
-          {/* CTA Button */}
-          <div className="hidden lg:flex items-center gap-4">
-            <Link to="/contact">
-              <Button variant="gold" size="lg">
-                Request a Quote
-              </Button>
-            </Link>
+          {/* CTA Buttons */}
+          <div className="hidden lg:flex shrink-0 items-center gap-2 xl:gap-3">
+            <Button variant="outline" size="lg" asChild className="border-emerald-700/30 text-emerald-800 hover:bg-emerald-50 hover:text-emerald-900 xl:px-4 px-3">
+              <a href={PHONES[0].href} aria-label={`Call us on ${PHONES[0].display}`} title={`Call ${PHONES[0].display}`}>
+                <Phone className="h-4 w-4" aria-hidden="true" />
+                <span className="hidden xl:inline">Call Us</span>
+              </a>
+            </Button>
+            <Button variant="gold" size="lg" asChild className="px-4 xl:px-8">
+              <Link to="/contact">Request a Quote</Link>
+            </Button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -151,12 +146,15 @@ export function Navbar() {
                     </Link>
                   </div>
                 ))}
-                <div className="pt-4 px-4">
-                  <Link to="/contact" onClick={() => setIsOpen(false)}>
-                    <Button variant="gold" size="lg" className="w-full">
-                      Request a Quote
-                    </Button>
-                  </Link>
+                <div className="pt-4 px-4 space-y-3">
+                  <Button variant="outline" size="lg" asChild className="w-full border-emerald-700/30 text-emerald-800 hover:bg-emerald-50">
+                    <a href={PHONES[0].href}>
+                      <Phone className="h-4 w-4" aria-hidden="true" /> Call Us · {PHONES[0].display}
+                    </a>
+                  </Button>
+                  <Button variant="gold" size="lg" asChild className="w-full">
+                    <Link to="/contact" onClick={() => setIsOpen(false)}>Request a Quote</Link>
+                  </Button>
                 </div>
               </div>
             </motion.div>

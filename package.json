@@ -1,11 +1,13 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "agrilink-global",
   "private": true,
   "version": "0.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "build:hostinger": "npm run build && find dist -name '.DS_Store' -delete",
+    "package:hostinger": "npm run build:hostinger && rm -f hostinger-upload.zip && cd dist && zip -r ../hostinger-upload.zip .",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview"

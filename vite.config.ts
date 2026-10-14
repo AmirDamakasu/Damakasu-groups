@@ -29,6 +29,8 @@ export default defineConfig({
     },
   },
   plugins: [react()],
+  // The build-time prerender (scripts/prerender.mjs) bundles all dependencies into one SSR file.
+  ssr: { noExternal: true },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

@@ -1,7 +1,8 @@
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
+import { HighlightsGallery } from "@/components/highlights/HighlightsGallery";
 import { Target, Eye, TrendingUp, CheckSquare, Globe, Users, Award } from "lucide-react";
 
 const values = [
@@ -43,24 +44,11 @@ const team = [
     role: "Founder, Managing Director & Chief Executive Officer (MD/CEO)",
     image: "/images/team/ceo.jpg",
   },
-  {
-    name: "Yarima Akar Bukar",
-    role: "General Accountant",
-    image: "/images/team/operations-director.jpg",
-  },
-  {
-    name: "Nasiru Adamu",
-    role: "Procurement & Supply Chain Manager",
-    image: "/images/team/procurement-manager.jpg",
-  },
-  {
-    name: "Muhammad Hassan Damakasu",
-    role: "Business Development & Customer Relationship Manager",
-    image: "/images/team/customer-relationship-manager.jpg",
-  },
 ];
 
 const About = () => {
+  const reduceMotion = useReducedMotion();
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -99,7 +87,7 @@ const About = () => {
         </section>
 
         {/* Story */}
-        <section className="py-24 bg-gradient-earth bg-grain">
+        <section className="overflow-x-clip py-24 bg-gradient-earth bg-grain">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="grid lg:grid-cols-2 gap-16 items-center">
               <motion.div
@@ -265,65 +253,116 @@ const About = () => {
           </div>
         </section>
 
-        {/* Team */}
-        <section className="py-24 bg-cream">
-          <div className="container mx-auto px-4 lg:px-8">
-            <div className="max-w-3xl mx-auto text-center mb-16">
-              <motion.span
-                initial={{ opacity: 0 }}
-                whileInView={{ opacity: 1 }}
-                viewport={{ once: true }}
-                className="text-secondary font-medium text-sm uppercase tracking-wider"
+        {/* Leadership */}
+        <section
+          className="relative overflow-hidden bg-cream py-20 md:py-28"
+          aria-labelledby="leadership-heading"
+        >
+          {/* Faint dot pattern and soft background shapes */}
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.35]"
+            style={{
+              backgroundImage: "radial-gradient(hsl(var(--primary) / 0.12) 1px, transparent 1px)",
+              backgroundSize: "22px 22px",
+            }}
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute -right-32 -top-32 h-96 w-96 rounded-full bg-emerald-700/5 blur-3xl"
+            aria-hidden="true"
+          />
+          <div
+            className="pointer-events-none absolute -bottom-40 -left-32 h-96 w-96 rounded-full bg-secondary/5 blur-3xl"
+            aria-hidden="true"
+          />
+
+          <div className="container relative mx-auto px-4 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: reduceMotion ? 0 : 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.4 }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="mx-auto mb-12 max-w-3xl text-center md:mb-16"
+            >
+              <p className="text-xs font-bold uppercase tracking-[0.28em] text-emerald-700">
+                Our Leadership
+              </p>
+              <h2
+                id="leadership-heading"
+                className="mt-4 font-serif text-3xl font-bold leading-tight text-primary sm:text-4xl md:text-5xl"
               >
-                LEADERSHIP
-              </motion.span>
-              <motion.h2
-                initial={{ opacity: 0, y: 20 }}
+                Meet the Person Behind Our Vision
+              </h2>
+              <div className="mx-auto mt-6 h-1 w-14 rounded-full bg-emerald-700" aria-hidden="true" />
+              <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground md:text-lg">
+                Led by experienced management, Damakasu Multi-Link Investment Ltd is committed to building
+                trusted agricultural supply partnerships and connecting Nigerian commodities with global markets.
+              </p>
+            </motion.div>
+
+            {team.map((member) => (
+              <motion.article
+                key={member.name}
+                initial={{ opacity: 0, y: reduceMotion ? 0 : 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.1 }}
-                className="font-serif text-3xl md:text-4xl font-bold text-foreground mt-3 mb-4"
+                viewport={{ once: true, amount: 0.25 }}
+                transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
+                className="group mx-auto max-w-5xl overflow-hidden rounded-3xl border border-border/60 bg-card shadow-soft transition-shadow duration-300 hover:shadow-medium"
               >
-                Meet Our Team
-              </motion.h2>
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: 0.2 }}
-                className="text-muted-foreground text-base max-w-2xl mx-auto"
-              >
-                Our experienced leadership team is committed to delivering reliable agricultural commodities and industrial raw materials to manufacturers, processors, and global buyers.
-              </motion.p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-              {team.map((member, index) => (
-                <motion.div
-                  key={member.name}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1 }}
-                  className="group bg-card rounded-2xl p-8 border border-border/40 shadow-soft hover:shadow-medium hover:border-secondary/20 transition-all duration-300 flex flex-col items-center text-center"
-                >
-                  <div className="relative w-40 h-40 rounded-full overflow-hidden border-4 border-background shadow-soft mb-6 transition-all duration-300 group-hover:shadow-medium shrink-0">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
+                <div className="grid md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                  <div className="relative bg-gradient-to-b from-emerald-50 to-cream p-6 sm:p-8 md:p-10">
+                    <div className="relative mx-auto max-w-[280px] md:max-w-none">
+                      <div
+                        className="absolute -inset-2 rounded-[1.75rem] border border-emerald-700/15"
+                        aria-hidden="true"
+                      />
+                      <div className="relative aspect-[1117/1306] overflow-hidden rounded-2xl bg-muted shadow-soft ring-4 ring-white">
+                        <img
+                          src={member.image}
+                          alt={`Portrait of ${member.name}, ${member.role}`}
+                          width={1117}
+                          height={1306}
+                          loading="lazy"
+                          className="h-full w-full object-cover object-top transition-transform duration-700 ease-out group-hover:scale-[1.02] motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+                        />
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="font-serif text-lg font-bold text-foreground mb-1 group-hover:text-secondary transition-colors line-clamp-1">
-                    {member.name}
-                  </h3>
-                  <p className="text-muted-foreground text-sm font-medium leading-relaxed flex-grow">
-                    {member.role}
-                  </p>
-                </motion.div>
-              ))}
-            </div>
+
+                  <div className="relative flex flex-col justify-center border-t border-border/60 p-8 text-center sm:p-10 md:border-t-0 md:p-12 md:pl-[calc(3rem+4px)] md:text-left lg:p-14 lg:pl-[calc(3.5rem+4px)]">
+                    {/* Green divider with a very slow, barely-there glow. */}
+                    <span
+                      className="absolute inset-y-0 left-0 hidden w-1 bg-emerald-700 md:block md:animate-accent-breathe motion-reduce:animate-none"
+                      aria-hidden="true"
+                    />
+                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-emerald-700">
+                      Founder &amp; MD/CEO
+                    </p>
+                    <h3 className="mt-3 font-serif text-2xl font-bold leading-tight text-primary sm:text-3xl lg:text-4xl">
+                      {member.name}
+                    </h3>
+                    <p className="mt-3 text-base font-medium leading-relaxed text-muted-foreground">
+                      {member.role}
+                    </p>
+
+                    <div className="my-8 h-px w-full bg-border" aria-hidden="true" />
+
+                    <p className="text-xs font-bold uppercase tracking-[0.24em] text-muted-foreground">
+                      Our leadership principle
+                    </p>
+                    <p className="mt-3 text-lg leading-relaxed text-foreground md:text-xl">
+                      Building trusted partnerships through responsible sourcing, dependable supply, and long-term
+                      business relationships.
+                    </p>
+                    <p className="mt-8 text-sm font-semibold text-primary">Damakasu Multi-Link Investment Ltd</p>
+                  </div>
+                </div>
+              </motion.article>
+            ))}
           </div>
         </section>
+
+        <HighlightsGallery />
       </main>
       <Footer />
       <FloatingWhatsApp />

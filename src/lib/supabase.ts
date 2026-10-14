@@ -1,9 +1,13 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Browser-safe credentials only: the project URL and the anon / publishable key.
+// Privileged keys (service_role, secret) live solely in Edge Function secrets.
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
+export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
+
+if (!isSupabaseConfigured) {
   console.warn(
     '[Supabase] Missing environment variables. ' +
     'Copy .env.example to .env and fill in your Supabase project URL and anon key.'
@@ -12,7 +16,9 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(
   supabaseUrl ?? 'https://placeholder.supabase.co',
-  supabaseAnonKey ?? 'placeholder'
+  supabaseAnonKey ?? 'placeholder',
+  // Only the admin dashboard signs in. Sessions persist in the browser (not during prerendering).
+  { auth: { persistSession: typeof window !== 'undefined', autoRefreshToken: typeof window !== 'undefined' } },
 );
 
 export type QuoteRequest = {
