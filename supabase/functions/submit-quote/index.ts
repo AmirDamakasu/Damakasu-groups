@@ -2,8 +2,15 @@
 // Deploy with: npx supabase functions deploy submit-quote
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import nodemailer from "npm:nodemailer@6.9.16";
 
 const COMPANY_EMAIL = Deno.env.get("COMPANY_EMAIL") ?? "info@damakasu.com";
+// Hostinger mailbox SMTP (preferred). Set the SMTP_PASSWORD secret to the info@damakasu.com
+// mailbox password to switch it on. Port 465 (TLS): Supabase blocks outbound 25 and 587.
+const SMTP_HOST = Deno.env.get("SMTP_HOST") ?? "smtp.hostinger.com";
+const SMTP_USER = Deno.env.get("SMTP_USER") ?? "info@damakasu.com";
+const SMTP_PASSWORD = Deno.env.get("SMTP_PASSWORD") ?? "";
+const SMTP_FROM = Deno.env.get("SMTP_FROM") ?? `Damakasu Multi-Link <${SMTP_USER}>`;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") ?? "";
 // Must be an address on a domain verified in Resend.
 const RESEND_FROM = Deno.env.get("RESEND_FROM") ?? "Damakasu Multi-Link <noreply@damakasu.com>";
@@ -20,7 +27,6 @@ const ALLOWED_ORIGINS = (Deno.env.get("ALLOWED_ORIGINS") ??
   [
     "https://damakasu.com",
     "https://www.damakasu.com",
-    "https://mistyrose-echidna-938984.hostingersite.com",
     "http://localhost:8080",
     "http://127.0.0.1:8080",
   ].join(","))
@@ -90,10 +96,29 @@ function clientIp(req: Request): string {
 
 const MAX_BODY_BYTES = 20_000;
 
-// ─── Resend helper ─────────────────────────────────────────────
-async function sendEmail(to: string, subject: string, html: string) {
+// ─── Email helper ──────────────────────────────────────────────
+// Sends through the Hostinger mailbox when SMTP_PASSWORD is set, otherwise through Resend when
+// RESEND_API_KEY is set, otherwise skips (the inquiry is still saved for the admin dashboard).
+const smtp = SMTP_PASSWORD
+  ? nodemailer.createTransport({
+    host: SMTP_HOST,
+    port: 465,
+    secure: true,
+    auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
+  })
+  : null;
+
+async function sendEmail(to: string, subject: string, html: string, replyTo?: string) {
+  if (smtp) {
+    try {
+      await smtp.sendMail({ from: SMTP_FROM, to, subject, html, ...(replyTo ? { replyTo } : {}) });
+    } catch (err) {
+      console.error("[SMTP] Failed:", err instanceof Error ? err.message : String(err));
+    }
+    return;
+  }
   if (!RESEND_API_KEY) {
-    console.warn("[Resend] No API key — email skipped");
+    console.warn("[Email] No SMTP_PASSWORD or RESEND_API_KEY — email skipped");
     return;
   }
   const res = await fetch("https://api.resend.com/emails", {
@@ -107,6 +132,7 @@ async function sendEmail(to: string, subject: string, html: string) {
       to: [to],
       subject,
       html,
+      ...(replyTo ? { reply_to: replyTo } : {}),
     }),
   });
   if (!res.ok) {
@@ -306,7 +332,7 @@ Deno.serve(async (req) => {
     //    the visitor typed, so it is only sent once reCAPTCHA is verifying, to avoid being used as a
     //    relay to send mail from our domain to arbitrary people.
     await Promise.allSettled([
-      sendEmail(COMPANY_EMAIL, `New Quote Request - ${data.name.slice(0, 80)}`, companyEmailHtml(data)),
+      sendEmail(COMPANY_EMAIL, `New Quote Request - ${data.name.slice(0, 80)}`, companyEmailHtml(data), data.email),
       RECAPTCHA_SECRET ? sendEmail(data.email, "Quote Request Received", customerEmailHtml(safeGreetingName(data.name))) : Promise.resolve(),
     ]);
 
