@@ -7,7 +7,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Button } from "@/components/ui/button";
 import { getProduct, productPath } from "@/data/products";
 import { marketAnchor, marketsForProduct } from "@/data/markets";
-import { PRIMARY_EMAIL, WHATSAPP_LINK } from "@/lib/contact";
+import { PRIMARY_EMAIL, whatsappLink } from "@/lib/contact";
 import NotFound from "./NotFound";
 
 const ProductDetail = () => {
@@ -108,7 +108,7 @@ const ProductDetail = () => {
                   </a>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
-                  <a href={WHATSAPP_LINK} target="_blank" rel="noopener noreferrer">
+                  <a href={whatsappLink(product.name)} target="_blank" rel="noopener noreferrer">
                     WhatsApp<span className="sr-only"> (opens in a new tab)</span>
                   </a>
                 </Button>

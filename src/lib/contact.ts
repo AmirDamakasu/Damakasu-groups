@@ -15,8 +15,25 @@ export const PHONES = [
   { display: "+234 903 784 4338", href: "tel:+2349037844338" },
 ];
 
-export const WHATSAPP_LINK =
-  "https://wa.me/2349160595507?text=Hello%20Damakasu%20Multi-Link%20Investiment%20Ltd.%20I%20would%20like%20to%20request%20a%20quotation.";
+export const WHATSAPP_NUMBER = "2349160595507";
+
+/** WhatsApp chat link with a ready-to-send enquiry; pass a product name to pre-fill it. */
+export const whatsappLink = (product?: string) => {
+  const message = [
+    "Hello Damakasu Multi-Link Investment Ltd 👋",
+    "",
+    `I found you on damakasu.com and I'm interested in ${product ?? "your agricultural commodities"}.`,
+    "",
+    `Product: ${product ?? ""}`,
+    "Quantity: ",
+    "Destination (country/port): ",
+    "",
+    "Please share current availability, specifications and a quotation. Thank you!",
+  ].join("\n");
+  return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+};
+
+export const WHATSAPP_LINK = whatsappLink();
 
 export const LOCATIONS = [
   {

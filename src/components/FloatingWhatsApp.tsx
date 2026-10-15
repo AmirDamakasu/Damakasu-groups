@@ -1,7 +1,5 @@
 import { useState } from "react";
-
-const WHATSAPP_LINK =
-  "https://wa.me/2349160595507?text=Hello%20Damakasu%20Multi-Link%20Investiment%20Ltd.%20I%20would%20like%20to%20request%20a%20quotation.";
+import { WHATSAPP_LINK } from "@/lib/contact";
 
 export function FloatingWhatsApp() {
   const [hovered, setHovered] = useState(false);
