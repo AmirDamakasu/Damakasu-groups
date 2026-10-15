@@ -390,6 +390,8 @@ export default function Admin() {
   const [state, setState] = useState<AdminState>("loading");
   const [notice, setNotice] = useState<string>();
   const resolveRef = useRef<(session: Session | null) => Promise<void>>();
+  const stateRef = useRef(state);
+  stateRef.current = state;
 
   useEffect(() => {
     if (!isSupabaseConfigured) {
@@ -428,10 +430,22 @@ export default function Admin() {
 
     supabase.auth.getSession().then(({ data }) => resolve(data.session));
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "MFA_CHALLENGE_VERIFIED") resolve(session);
+      // Supabase runs this callback while holding its auth lock; calling Supabase from inside it
+      // (resolve -> rpc / getAuthenticatorAssuranceLevel) deadlocks, e.g. when a saved session is
+      // refreshed on page load. Deferring the work releases the lock first.
+      if (event === "SIGNED_IN" || event === "SIGNED_OUT" || event === "MFA_CHALLENGE_VERIFIED") {
+        setTimeout(() => void resolve(session), 0);
+      }
     });
+    // Never leave the visitor on the loading screen: fall back to the sign-in form.
+    const fallback = window.setTimeout(() => {
+      if (cancelled || stateRef.current !== "loading") return;
+      setNotice("Sign-in check took too long. Please sign in again.");
+      setState("signed-out");
+    }, 15_000);
     return () => {
       cancelled = true;
+      window.clearTimeout(fallback);
       listener.subscription.unsubscribe();
     };
   }, []);
@@ -462,7 +476,13 @@ export default function Admin() {
     await resolveRef.current?.(data.session);
   };
 
-  if (state === "loading") return <div className="min-h-screen bg-background" />;
+  if (state === "loading") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background text-sm text-muted-foreground" role="status">
+        Loading admin dashboard…
+      </div>
+    );
+  }
   if (state === "admin") return <Dashboard onLogout={signOut} />;
   if (state === "mfa-enroll" || state === "mfa-verify") {
     return <MfaScreen mode={state === "mfa-enroll" ? "enroll" : "verify"} onVerified={afterMfa} onCancel={signOut} />;
