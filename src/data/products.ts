@@ -72,7 +72,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["soybeans", "ginger", "dried-hibiscus"],
-    seoTitle: "Nigerian Sesame Seeds Supplier | Natural White & Hulled",
+    seoTitle: "Sesame Seeds Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source natural white, hulled and black sesame seeds from Nigeria through Damakasu Multi-Link Investment Ltd. Specifications agreed per contract. Request a quotation.",
   },
@@ -97,7 +97,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["sesame-seeds", "ginger", "cocoa-beans"],
-    seoTitle: "Nigerian Cashew Nuts Supplier | Raw Cashew Sourcing",
+    seoTitle: "Raw Cashew Nuts Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source Nigerian cashew nuts for processing and food manufacturing through Damakasu Multi-Link Investment Ltd. Grades and quality agreed per contract. Request a quote.",
   },
@@ -122,7 +122,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["yellow-maize", "sorghum", "sesame-seeds"],
-    seoTitle: "Nigerian Soybeans Supplier | Feed & Oil Extraction Grade",
+    seoTitle: "Soybeans Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source Nigerian soybeans for oil extraction, animal feed and food processing through Damakasu Multi-Link Investment Ltd. Grades confirmed per contract. Request a quote.",
   },
@@ -147,7 +147,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["yellow-maize", "sorghum", "pearl-millet"],
-    seoTitle: "Industrial Grade Rice Supply in Nigeria | Bulk Rice",
+    seoTitle: "Industrial Grade Rice Supply in Nigeria | Damakasu",
     seoDescription:
       "Bulk long grain, parboiled and broken rice for food processors through Damakasu Multi-Link Investment Ltd. Specifications confirmed per order. Request a quotation.",
   },
@@ -172,7 +172,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["sorghum", "soybeans", "pearl-millet"],
-    seoTitle: "Nigerian Yellow Maize Supplier | Feed & Milling Grade",
+    seoTitle: "Yellow Maize Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source yellow maize from Nigeria for feed mills and food processing through Damakasu Multi-Link Investment Ltd. Quality limits agreed per contract. Request a quote.",
   },
@@ -197,7 +197,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["ginger", "sesame-seeds", "cashew-nuts"],
-    seoTitle: "Nigerian Dried Hibiscus Flowers Supplier | Hibiscus Calyx",
+    seoTitle: "Dried Hibiscus Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source dried hibiscus flowers (calyces) from Nigeria for beverages and herbal processing through Damakasu Multi-Link Investment Ltd. Request a quotation.",
   },
@@ -222,7 +222,7 @@ export const products: Product[] = [
     origin: "Confirmed per quotation",
     status: "Sourcing on request — origin, grade and availability confirmed per quotation.",
     related: ["cocoa-beans", "ginger", "sesame-seeds"],
-    seoTitle: "Coffee Beans Sourcing | Damakasu Multi-Link Investment Ltd",
+    seoTitle: "Coffee Beans Sourcing on Request | Damakasu",
     seoDescription:
       "Coffee bean sourcing on request for roasters and distributors through Damakasu Multi-Link Investment Ltd. Origin and grade confirmed per quotation. Enquire today.",
   },
@@ -247,7 +247,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["dried-hibiscus", "sesame-seeds", "cashew-nuts"],
-    seoTitle: "Nigerian Dried Ginger Supplier | Split & Whole Ginger",
+    seoTitle: "Dried Ginger Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source dried split and whole ginger from Nigeria for spice processing and extraction through Damakasu Multi-Link Investment Ltd. Request a quotation.",
   },
@@ -272,7 +272,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["coffee-beans", "cashew-nuts", "ginger"],
-    seoTitle: "Nigerian Cocoa Beans Supplier | Fermented Cocoa",
+    seoTitle: "Cocoa Beans Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source fermented, sun-dried Nigerian cocoa beans for confectionery and cocoa processing through Damakasu Multi-Link Investment Ltd. Request a quotation.",
   },
@@ -297,7 +297,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["sorghum", "yellow-maize", "rice"],
-    seoTitle: "Nigerian Pearl Millet Supplier | Bulk Millet Grain",
+    seoTitle: "Pearl Millet Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source pearl millet from northern Nigeria for food manufacturing and animal feed through Damakasu Multi-Link Investment Ltd. Request a quotation.",
   },
@@ -322,7 +322,7 @@ export const products: Product[] = [
     origin: "Nigeria",
     status: DEFAULT_STATUS,
     related: ["yellow-maize", "pearl-millet", "soybeans"],
-    seoTitle: "Nigerian Sorghum Supplier | White & Red Sorghum",
+    seoTitle: "Sorghum Supplier in Nigeria | Damakasu",
     seoDescription:
       "Source white and red sorghum from Nigeria for milling, animal feed and brewing through Damakasu Multi-Link Investment Ltd. Request a quotation.",
   },

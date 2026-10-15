@@ -48,7 +48,7 @@ function getCorsHeaders(requestOrigin: string | null) {
 function clean(input: unknown, maxLength: number): string {
   if (typeof input !== "string") return "";
   // deno-lint-ignore no-control-regex
-  return input.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim().slice(0, maxLength);
+  return input.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, "").trim().slice(0, maxLength); // eslint-disable-line no-control-regex -- strips control characters on purpose
 }
 
 function escapeHtml(value: string): string {
