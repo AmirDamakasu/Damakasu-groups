@@ -12,7 +12,7 @@ export const SECONDARY_EMAIL_HREF =
 
 export const PHONES = [
   { display: "+234 916 059 5507", href: "tel:+2349160595507" },
-  { display: "+234 903 598 893", href: "tel:+234903598893" },
+  { display: "+234 903 784 4338", href: "tel:+2349037844338" },
 ];
 
 export const WHATSAPP_LINK =
