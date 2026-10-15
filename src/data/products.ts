@@ -10,14 +10,17 @@ import cocoaImg from "@/assets/product-cocoa.jpg";
 import milletImg from "@/assets/product-millet.jpg";
 import sorghumImg from "@/assets/product-sorghum.jpg";
 
-// WebP renditions (full width and 640px) generated next to each JPEG; the JPEG stays the fallback
-// and is used for social previews.
+// WebP renditions generated next to each JPEG (full width plus 160/480/640/800px where the original
+// is wider); the JPEG stays the fallback and is used for social previews.
 const webpFiles = import.meta.glob("../assets/product-*.webp", { eager: true, import: "default" }) as Record<string, string>;
-const webpSrcSet = (file: string, width: number) => {
-  const small = webpFiles[`../assets/${file}-640.webp`];
-  const full = webpFiles[`../assets/${file}.webp`];
-  return width > 640 ? `${small} 640w, ${full} ${width}w` : `${full} ${width}w`;
-};
+const WEBP_WIDTHS = [160, 480, 640, 800];
+const webpSrcSet = (file: string, width: number) =>
+  [
+    ...WEBP_WIDTHS.filter((w) => w < width && webpFiles[`../assets/${file}-${w}.webp`]).map(
+      (w) => `${webpFiles[`../assets/${file}-${w}.webp`]} ${w}w`,
+    ),
+    `${webpFiles[`../assets/${file}.webp`]} ${width}w`,
+  ].join(", ");
 
 export const PRODUCT_GROUPS = ["Oilseeds & Legumes", "Grains & Cereals", "Spices & Botanicals", "Nuts, Cocoa & Coffee"] as const;
 export type ProductGroup = (typeof PRODUCT_GROUPS)[number];

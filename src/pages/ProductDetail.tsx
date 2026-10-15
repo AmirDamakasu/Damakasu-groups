@@ -52,7 +52,7 @@ const ProductDetail = () => {
         <section className="bg-cream py-12 md:py-20">
           <div className="container mx-auto grid max-w-6xl gap-10 px-4 lg:grid-cols-2 lg:px-8">
             <div className="overflow-hidden rounded-2xl border border-border/40 shadow-medium lg:self-start">
-              <img src={product.image} srcSet={product.imageSrcSet} sizes="(min-width: 1024px) 50vw, 100vw" alt={product.imageAlt} className="aspect-[4/3] h-full w-full object-cover" />
+              <img src={product.image} srcSet={product.imageSrcSet} sizes="(min-width: 1024px) 50vw, 100vw" alt={product.imageAlt} {...{ fetchpriority: "high" }} className="aspect-[4/3] h-full w-full object-cover" />
             </div>
 
             <div className="rounded-2xl border border-border/60 bg-card p-6 shadow-soft sm:p-8">
