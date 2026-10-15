@@ -222,7 +222,7 @@ function customerEmailHtml(rawName: string) {
     <div style="background:#f0fdf4;border-left:4px solid #22c55e;padding:16px;border-radius:4px;margin:24px 0">
       <p style="margin:0;color:#166534;">For urgent inquiries, please contact us directly:</p>
       <p style="margin:8px 0 0;color:#166534;">
-        📞 +234 903 784 4338 &nbsp;|&nbsp; 📞 +234 903 598 893<br/>
+        📞 +234 916 059 5507 &nbsp;|&nbsp; 📞 +234 903 598 893<br/>
         💬 <a href="https://wa.me/2349160595507" style="color:#166534;">Chat on WhatsApp</a>
       </p>
     </div>

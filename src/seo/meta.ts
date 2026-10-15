@@ -121,7 +121,7 @@ const staticPages: Record<string, RouteMeta> = {
   "/contact": page(
     "/contact",
     "Contact Damakasu | Agricultural Commodity Supply",
-    "Contact Damakasu Multi-Link Investment Ltd for Nigerian agricultural commodity sourcing and quotations. Email info@damakasu.com or call +234 903 784 4338.",
+    "Contact Damakasu Multi-Link Investment Ltd for Nigerian agricultural commodity sourcing and quotations. Email info@damakasu.com or call +234 916 059 5507.",
     "Contact Us",
   ),
   "/privacy-policy": page(
