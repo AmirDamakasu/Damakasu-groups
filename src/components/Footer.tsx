@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mail, Phone, MapPin } from "lucide-react";
 import damakasuLogo from "/logo-160.png";
@@ -22,7 +23,13 @@ const products = catalog
   .filter((product) => footerProductSlugs.includes(product.slug))
   .map((product) => ({ name: product.name, href: productPath(product) }));
 
+// Year the site was built; updated after mount so hydration matches the prerendered HTML.
+const BUILD_YEAR = new Date().getFullYear();
+
 export function Footer() {
+  const [year, setYear] = useState(BUILD_YEAR);
+  useEffect(() => setYear(new Date().getFullYear()), []);
+
   return (
     <footer className="bg-primary text-primary-foreground">
       <div className="container mx-auto px-4 lg:px-8 py-16">
@@ -182,7 +189,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="border-t border-primary-foreground/10 mt-12 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-primary-foreground/60 text-sm">
-            © {new Date().getFullYear()} {COMPANY_NAME}. All rights reserved.
+            © {year} {COMPANY_NAME}. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link to="/privacy-policy" className="inline-flex min-h-11 items-center text-primary-foreground/60 hover:text-blue-300 transition-colors text-sm">

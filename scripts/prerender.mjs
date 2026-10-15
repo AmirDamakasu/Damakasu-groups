@@ -10,7 +10,18 @@ const dist = path.join(root, "dist");
 const ssrDir = path.join(root, "dist-ssr");
 
 const ssr = await import(pathToFileURL(path.join(ssrDir, "entry-server.js")).href);
-const template = await fs.readFile(path.join(dist, "index.html"), "utf8");
+// Preload the two font files used by above-the-fold text (headline serif, body sans) so they arrive
+// with the page instead of after the stylesheet, avoiding a late font swap and reflow.
+const assetFiles = await fs.readdir(path.join(dist, "assets"));
+const criticalFonts = [/^playfair-display-latin-700-normal-.*\.woff2$/, /^dm-sans-latin-400-normal-.*\.woff2$/].map((pattern) => {
+  const file = assetFiles.find((name) => pattern.test(name));
+  if (!file) throw new Error(`Critical font not found in dist/assets: ${pattern}`);
+  return `<link rel="preload" href="/assets/${file}" as="font" type="font/woff2" crossorigin />`;
+});
+const template = (await fs.readFile(path.join(dist, "index.html"), "utf8")).replace(
+  "</head>",
+  `  ${criticalFonts.join("\n  ")}\n</head>`,
+);
 
 const HEAD_PLACEHOLDER = /<!--seo-head-->\s*<title[^>]*>[\s\S]*?<\/title>/;
 if (!HEAD_PLACEHOLDER.test(template) || !template.includes("<!--app-html-->")) {

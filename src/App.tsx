@@ -1,8 +1,4 @@
 import { lazy, Suspense, useEffect, type ReactNode } from "react";
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { Seo } from "@/components/Seo";
 import Index from "./pages/Index";
@@ -19,8 +15,6 @@ import NotFound from "./pages/NotFound";
 // The admin dashboard pulls in large libraries (spreadsheet export), so it loads only when visited.
 const Admin = lazy(() => import("./pages/Admin"));
 
-const queryClient = new QueryClient();
-
 function ScrollToTop() {
   const { pathname, hash } = useLocation();
   useEffect(() => {
@@ -35,17 +29,13 @@ function ScrollToTop() {
   return null;
 }
 
-/** Providers and routes shared by the browser app and the build-time prerenderer. */
+/**
+ * Wrapper shared by the browser app and the build-time prerenderer. (The unused React Query,
+ * tooltip and toast providers were removed: nothing on the site called them, and they added
+ * ~25 KB of JavaScript to every page.)
+ */
 export function AppShell({ children }: { children?: ReactNode }) {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        {children}
-      </TooltipProvider>
-    </QueryClientProvider>
-  );
+  return <>{children}</>;
 }
 
 export function AppRoutes() {

@@ -2,7 +2,7 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { FloatingWhatsApp } from "@/components/FloatingWhatsApp";
 import { motion, useReducedMotion } from "framer-motion";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useRecaptcha } from "@/hooks/use-recaptcha";
 import { Button } from "@/components/ui/button";
@@ -85,13 +85,15 @@ const buildEmailFallback = (data: FormState) => {
 function QuoteForm() {
   const recaptcha = useRecaptcha(RECAPTCHA_SITE_KEY);
   const [searchParams] = useSearchParams();
-  const [formData, setFormData] = useState(() => {
-    // Product pages link here with ?product=<slug>, and "Become a Supplier" buttons with ?type=supplier.
+  const [formData, setFormData] = useState(EMPTY_FORM);
+  // Product pages link here with ?product=<slug>, and "Become a Supplier" buttons with ?type=supplier.
+  // Applied after mount rather than in the initial state, so the first render matches the
+  // prerendered HTML (which has no query string) and hydration keeps it.
+  useEffect(() => {
     const product = getProduct(searchParams.get("product") ?? "");
-    if (product) return { ...EMPTY_FORM, product: product.name, inquiryType: "Request a Quotation" };
-    if (searchParams.get("type") === "supplier") return { ...EMPTY_FORM, inquiryType: "Become a Supplier" };
-    return EMPTY_FORM;
-  });
+    if (product) setFormData((current) => ({ ...current, product: product.name, inquiryType: "Request a Quotation" }));
+    else if (searchParams.get("type") === "supplier") setFormData((current) => ({ ...current, inquiryType: "Become a Supplier" }));
+  }, [searchParams]);
   // Honeypot: hidden from people, so only bots fill it. Kept outside formData so it is never shown.
   const [website, setWebsite] = useState("");
   // Blocks a second submission while one is in flight (state updates are not instant on double-clicks).
@@ -405,16 +407,16 @@ const Contact = () => {
             <div className="absolute inset-0 bg-grain opacity-20" />
             <div className="container relative z-10 mx-auto px-4 lg:px-8">
               <div className="mx-auto max-w-3xl text-center">
-                <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                <motion.span initial={false} animate={{ opacity: 1 }}
                   className="text-sm font-medium uppercase tracking-wider text-blue-400">
                   Get in Touch
                 </motion.span>
-                <motion.h1 initial={{ opacity: 0, y: reduceMotion ? 0 : 20 }} animate={{ opacity: 1, y: 0 }}
+                <motion.h1 initial={{ y: reduceMotion ? 0 : 20 }} animate={{ y: 0 }}
                   transition={{ delay: 0.1 }}
                   className="mb-6 mt-3 font-serif text-4xl font-bold text-primary-foreground md:text-5xl lg:text-6xl">
                   Contact Us
                 </motion.h1>
-                <motion.p initial={{ opacity: 0, y: reduceMotion ? 0 : 20 }} animate={{ opacity: 1, y: 0 }}
+                <motion.p initial={{ y: reduceMotion ? 0 : 20 }} animate={{ y: 0 }}
                   transition={{ delay: 0.2 }}
                   className="text-lg leading-relaxed text-primary-foreground/80">
                   Connect with {COMPANY_NAME} for agricultural commodity sourcing, supply partnerships,
@@ -422,7 +424,7 @@ const Contact = () => {
                 </motion.p>
 
                 {/* Contact actions */}
-                <motion.div initial={{ opacity: 0, y: reduceMotion ? 0 : 20 }} animate={{ opacity: 1, y: 0 }}
+                <motion.div initial={{ y: reduceMotion ? 0 : 20 }} animate={{ y: 0 }}
                   transition={{ delay: 0.3 }}
                   className="mt-10 grid grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:justify-center">
                   {actions.map((action) => (

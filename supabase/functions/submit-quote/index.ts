@@ -105,6 +105,10 @@ const smtp = SMTP_PASSWORD
     port: 465,
     secure: true,
     auth: { user: SMTP_USER, pass: SMTP_PASSWORD },
+    // Fail fast instead of hanging if the mail server is slow or unreachable.
+    connectionTimeout: 10_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 15_000,
   })
   : null;
 
@@ -123,6 +127,7 @@ async function sendEmail(to: string, subject: string, html: string, replyTo?: st
   }
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
+    signal: AbortSignal.timeout(10_000),
     headers: {
       Authorization: `Bearer ${RESEND_API_KEY}`,
       "Content-Type": "application/json",
@@ -138,6 +143,14 @@ async function sendEmail(to: string, subject: string, html: string, replyTo?: st
   if (!res.ok) {
     console.error("[Resend] Failed:", await res.text());
   }
+}
+
+// Keeps the function alive after the response until `task` settles (Supabase Edge Runtime);
+// elsewhere (local tools without EdgeRuntime) it falls back to fire-and-forget.
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined;
+function runInBackground(task: Promise<unknown>) {
+  if (typeof EdgeRuntime !== "undefined") EdgeRuntime.waitUntil(task);
+  else task.catch((err) => console.error("[Background] task failed:", err));
 }
 
 // ─── Rate limit check ──────────────────────────────────────────
@@ -157,6 +170,7 @@ async function verifyRecaptcha(token: string, ip: string): Promise<boolean> {
   if (!RECAPTCHA_SECRET) return true; // skip if not configured
   const res = await fetch("https://www.google.com/recaptcha/api/siteverify", {
     method: "POST",
+    signal: AbortSignal.timeout(5_000),
     body: new URLSearchParams({ secret: RECAPTCHA_SECRET, response: token, remoteip: ip }),
   });
   const json = await res.json();
@@ -330,11 +344,12 @@ Deno.serve(async (req) => {
 
     // 7. Emails (failures don't fail the submission). The customer confirmation goes to an address
     //    the visitor typed, so it is only sent once reCAPTCHA is verifying, to avoid being used as a
-    //    relay to send mail from our domain to arbitrary people.
-    await Promise.allSettled([
+    //    relay to send mail from our domain to arbitrary people. The inquiry is already saved, so the
+    //    emails are sent in the background and the visitor gets the reply without waiting for SMTP.
+    runInBackground(Promise.allSettled([
       sendEmail(COMPANY_EMAIL, `New Quote Request - ${data.name.slice(0, 80)}`, companyEmailHtml(data), data.email),
       RECAPTCHA_SECRET ? sendEmail(data.email, "Quote Request Received", customerEmailHtml(safeGreetingName(data.name))) : Promise.resolve(),
-    ]);
+    ]));
 
     return json(200, { success: true, message: "Thank you for your inquiry. Our sales team will contact you within 24 hours." });
   } catch (err) {

@@ -47,6 +47,11 @@ ErrorDocument 404 /404.html
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
   Header always set Cross-Origin-Opener-Policy "same-origin"
+  # Hostinger CDN's HTTP/3 (QUIC) stalls for this site: pages hang or time out over h3 while the
+  # same pages load in 1-3 s over HTTP/2 (measured 15 Oct 2026). Tell browsers not to switch to h3.
+  # Note: while Hostinger CDN is on, it overrides this and still sends h3; disable the CDN in hPanel.
+  Header always unset Alt-Svc
+  Header always set Alt-Svc "clear"
   # Browsers must use HTTPS for this site for a year (add includeSubDomains only once every
   # subdomain serves HTTPS).
   Header always set Strict-Transport-Security "max-age=31536000"
@@ -68,10 +73,13 @@ ErrorDocument 404 /404.html
   ExpiresByType text/html "access plus 0 seconds"
   ExpiresByType application/xml "access plus 1 day"
   ExpiresByType text/plain "access plus 1 day"
-  # Files in /assets/ have content hashes in their names, so they can be cached for a year.
+  # Hashed files in /assets/ get a year (and "immutable") from assets/.htaccess. These type rules
+  # cover everything else; /images/ files keep their names when replaced, so they get a month.
   ExpiresByType text/css "access plus 1 year"
   ExpiresByType application/javascript "access plus 1 year"
-  ExpiresByType image/webp "access plus 1 year"
+  ExpiresByType text/javascript "access plus 1 year"
+  ExpiresByType font/woff2 "access plus 1 year"
+  ExpiresByType image/webp "access plus 1 month"
   ExpiresByType image/jpeg "access plus 1 month"
   ExpiresByType image/png "access plus 1 month"
   ExpiresByType image/svg+xml "access plus 1 month"
